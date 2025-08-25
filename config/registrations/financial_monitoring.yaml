@@ -1,0 +1,34 @@
+---
+# Financial Risk Monitoring Registration
+reference: "TraceOne_Financial_Monitoring"
+description: "Financial and risk monitoring for high-value suppliers and customers"
+
+# Monitoring scope
+lod: "duns_list"
+duns_list: []  # To be populated with actual DUNS numbers
+
+# Data configuration - financial and risk data blocks
+dataBlocks:
+  - "companyfinancials_L1_v1"        # Financial statements
+  - "paymentinsights_L1_v1"         # Payment experiences
+  - "financialstrengthinsight_L2_v1" # Risk assessment
+
+# Notification settings
+seedData: false
+notificationType: "UPDATE"
+deliveryTrigger: "API_PULL"
+
+# Data filtering - monitor critical financial information
+jsonPathInclusion:
+  - "organization.financials"
+  - "organization.paymentExperiences"
+  - "organization.riskAssessment"
+  - "organization.financialStrength"
+  - "organization.dnbRating"
+  - "organization.creditLimit"
+  - "organization.operatingStatus"
+
+# Contact information for financial alerts
+# emailAddresses:
+#   - "risk@traceone.com"
+#   - "finance@traceone.com"

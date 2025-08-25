@@ -1,0 +1,36 @@
+---
+# Standard Company Monitoring Registration
+reference: "TraceOne_Standard_Monitoring"
+description: "Standard company information monitoring for TraceOne platform"
+
+# Monitoring scope
+lod: "duns_list"
+duns_list: []  # To be populated with actual DUNS numbers
+
+# Data configuration  
+dataBlocks:
+  - "companyinfo_L2_v1"           # Basic company information
+  - "principalscontacts_L1_v1"    # Key contacts and principals
+  - "hierarchyconnections_L1_v1"  # Corporate hierarchy
+
+# Notification settings
+seedData: false
+notificationType: "UPDATE"
+deliveryTrigger: "API_PULL"
+
+# Data filtering - monitor key business information
+jsonPathInclusion:
+  - "organization.primaryName"
+  - "organization.tradeStyleNames"
+  - "organization.registeredAddress"
+  - "organization.mailingAddress"
+  - "organization.telephone"
+  - "organization.websiteAddress"
+  - "organization.primaryIndustryCode"
+  - "organization.operatingStatus"
+  - "organization.businessEntityType"
+
+# Contact information (optional)
+# emailAddresses:
+#   - "monitoring@traceone.com"
+#   - "alerts@traceone.com"
