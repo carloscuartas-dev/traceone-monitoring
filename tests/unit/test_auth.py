@@ -1,5 +1,5 @@
 """
-Unit tests for D&B authentication module
+Unit tests for TraceOne authentication module
 """
 
 import pytest
@@ -8,21 +8,21 @@ from unittest.mock import Mock, patch, MagicMock
 import requests
 
 from traceone_monitoring.auth.authenticator import (
-    DNBAuthenticator,
+    TraceOneAuthenticator,
     AuthenticationError,
     InvalidCredentialsError,
     TokenExpiredError
 )
-from traceone_monitoring.utils.config import DNBApiConfig
+from traceone_monitoring.utils.config import TraceOneApiConfig
 
 
 @pytest.fixture
-def dnb_config():
-    """Create test D&B API configuration"""
-    return DNBApiConfig(
-        client_id="test_client_id",
-        client_secret="test_client_secret",
-        base_url="https://test.dnb.com",
+def traceone_config():
+    """Create test TraceOne API configuration"""
+    return TraceOneApiConfig(
+        api_key="test_api_key",
+        api_secret="test_api_secret",
+        base_url="https://api.test.traceone.app",
         rate_limit=5.0,
         timeout=30,
         retry_attempts=3,
@@ -31,17 +31,17 @@ def dnb_config():
 
 
 @pytest.fixture
-def authenticator(dnb_config):
-    """Create DNB authenticator for testing"""
-    return DNBAuthenticator(dnb_config)
+def authenticator(traceone_config):
+    """Create TraceOne authenticator for testing"""
+    return TraceOneAuthenticator(traceone_config)
 
 
-class TestDNBAuthenticator:
-    """Test cases for DNB authenticator"""
+class TestTraceOneAuthenticator:
+    """Test cases for TraceOne authenticator"""
     
-    def test_initialization(self, authenticator, dnb_config):
+    def test_initialization(self, authenticator, traceone_config):
         """Test authenticator initialization"""
-        assert authenticator.config == dnb_config
+        assert authenticator.config == traceone_config
         assert authenticator.token is None
         assert authenticator.token_expiry is None
         assert authenticator.session is not None
@@ -68,7 +68,7 @@ class TestDNBAuthenticator:
         # Verify API call was made correctly
         mock_post.assert_called_once()
         call_args = mock_post.call_args
-        assert "https://test.dnb.com/v2/token" in str(call_args)
+        assert "https://api.test.traceone.app/oauth/token" in str(call_args)
     
     @patch('requests.Session.post')
     def test_invalid_credentials_error(self, mock_post, authenticator):
