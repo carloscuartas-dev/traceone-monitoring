@@ -9,8 +9,8 @@ from unittest.mock import Mock, patch, AsyncMock
 
 from traceone_monitoring.api.pull_client import (
     PullApiClient,
-    PullError,
-    NoNotificationsError
+    NotFoundError,
+    NotFoundError
 )
 from traceone_monitoring.models.notification import NotificationResponse
 from traceone_monitoring.models.registration import Registration
@@ -86,7 +86,7 @@ class TestPullApiClient:
         
         client = PullApiClient(mock_api_client)
         
-        with pytest.raises(NoNotificationsError):
+        with pytest.raises(NotFoundError):
             client.pull_notifications(sample_registration.reference)
 
     def test_replay_notifications_success(self, mock_api_client, api_response_data, sample_registration):

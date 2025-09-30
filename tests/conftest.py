@@ -13,15 +13,15 @@ import yaml
 
 from traceone_monitoring.utils.config import (
     AppConfig,
-    TraceOneApiConfig,
+    DNBApiConfig,
     MonitoringConfig,
     LoggingConfig
 )
-from traceone_monitoring.auth.authenticator import TraceOneAuthenticator
-from traceone_monitoring.api.client import TraceOneApiClient
+from traceone_monitoring.auth.authenticator import DNBAuthenticator
+from traceone_monitoring.api.client import DNBApiClient
 from traceone_monitoring.api.pull_client import PullApiClient
 from traceone_monitoring.services.registration_service import RegistrationManager
-from traceone_monitoring.services.monitoring_service import TraceOneMonitoringService
+from traceone_monitoring.services.monitoring_service import DNBMonitoringService
 from traceone_monitoring.models.notification import (
     Notification,
     NotificationElement,
@@ -47,16 +47,16 @@ def event_loop():
 
 # Configuration fixtures
 @pytest.fixture
-def traceone_api_config():
-    """Create test TraceOne API configuration"""
-    return TraceOneApiConfig(
-        api_key="test_api_key",
-        api_secret="test_api_secret",
-        base_url="https://api.test.traceone.app",
-        rate_limit=10.0,
+def dnb_api_config():
+    """Create test D&B API configuration"""
+    return DNBApiConfig(
+        client_id="test_client_id",
+        client_secret="test_client_secret",
+        base_url="https://plus.dnb.com",
+        rate_limit=5.0,
         timeout=30,
         retry_attempts=3,
-        backoff_factor=1.5
+        backoff_factor=2.0
     )
 
 
@@ -86,12 +86,25 @@ def logging_config():
 
 
 @pytest.fixture
-def app_config(traceone_api_config, monitoring_config, logging_config):
+def database_config():
+    """Create test database configuration"""
+    from traceone_monitoring.utils.config import DatabaseConfig
+    return DatabaseConfig(
+        url="sqlite:///test.db",
+        pool_size=5,
+        max_overflow=10,
+        pool_timeout=30,
+        pool_recycle=3600
+    )
+
+@pytest.fixture
+def app_config(dnb_api_config, database_config, monitoring_config, logging_config):
     """Create complete application configuration"""
     return AppConfig(
         environment="test",
         debug=True,
-        traceone_api=traceone_api_config,
+        dnb_api=dnb_api_config,
+        database=database_config,
         monitoring=monitoring_config,
         logging=logging_config
     )
@@ -178,8 +191,8 @@ def mock_failed_auth_response():
 # Component fixtures
 @pytest.fixture
 def mock_authenticator():
-    """Create mock TraceOne authenticator"""
-    authenticator = Mock(spec=TraceOneAuthenticator)
+    """Create mock D&B authenticator"""
+    authenticator = Mock(spec=DNBAuthenticator)
     authenticator.is_authenticated = True
     authenticator.token = "test_token_12345"
     authenticator.token_expires_in = 3600
@@ -193,8 +206,8 @@ def mock_authenticator():
 
 @pytest.fixture
 def mock_api_client():
-    """Create mock TraceOne API client"""
-    client = Mock(spec=TraceOneApiClient)
+    """Create mock D&B API client"""
+    client = Mock(spec=DNBApiClient)
     client.health_check.return_value = True
     client.session = Mock()
     return client
@@ -295,7 +308,7 @@ def monitoring_service(
     mock_registration_manager
 ):
     """Create monitoring service with mocked dependencies"""
-    return TraceOneMonitoringService(
+    return DNBMonitoringService(
         config=app_config,
         authenticator=mock_authenticator,
         api_client=mock_api_client,
@@ -373,7 +386,7 @@ def registration_response_data():
 @pytest.fixture
 async def async_mock_monitoring_service():
     """Create async mock monitoring service"""
-    service = AsyncMock(spec=TraceOneMonitoringService)
+    service = AsyncMock(spec=DNBMonitoringService)
     service.health_check.return_value = True
     service.get_service_status.return_value = {
         "service": {"running": True},
@@ -402,7 +415,7 @@ def freeze_time():
     def _freeze_time(frozen_datetime):
         """Context manager that freezes datetime.utcnow()"""
         from unittest.mock import patch
-        return patch('datetime.datetime') as mock_datetime
+        mock_datetime = patch('datetime.datetime')
         mock_datetime.utcnow.return_value = frozen_datetime
         return mock_datetime
     

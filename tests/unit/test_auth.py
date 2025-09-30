@@ -8,18 +8,18 @@ from unittest.mock import Mock, patch, MagicMock
 import requests
 
 from traceone_monitoring.auth.authenticator import (
-    TraceOneAuthenticator,
+    DNBAuthenticator,
     AuthenticationError,
     InvalidCredentialsError,
     TokenExpiredError
 )
-from traceone_monitoring.utils.config import TraceOneApiConfig
+from traceone_monitoring.utils.config import DNBApiConfig
 
 
 @pytest.fixture
-def traceone_config():
+def dnb_config():
     """Create test TraceOne API configuration"""
-    return TraceOneApiConfig(
+    return DNBApiConfig(
         api_key="test_api_key",
         api_secret="test_api_secret",
         base_url="https://api.test.traceone.app",
@@ -31,17 +31,17 @@ def traceone_config():
 
 
 @pytest.fixture
-def authenticator(traceone_config):
+def authenticator(dnb_config):
     """Create TraceOne authenticator for testing"""
-    return TraceOneAuthenticator(traceone_config)
+    return DNBAuthenticator(dnb_config)
 
 
-class TestTraceOneAuthenticator:
+class TestDNBAuthenticator:
     """Test cases for TraceOne authenticator"""
     
-    def test_initialization(self, authenticator, traceone_config):
+    def test_initialization(self, authenticator, dnb_config):
         """Test authenticator initialization"""
-        assert authenticator.config == traceone_config
+        assert authenticator.config == dnb_config
         assert authenticator.token is None
         assert authenticator.token_expiry is None
         assert authenticator.session is not None

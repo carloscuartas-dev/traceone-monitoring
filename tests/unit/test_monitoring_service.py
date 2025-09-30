@@ -8,7 +8,7 @@ from datetime import datetime
 from unittest.mock import Mock, patch, AsyncMock, call
 
 from traceone_monitoring.services.monitoring_service import (
-    TraceOneMonitoringService,
+    DNBMonitoringService,
     MonitoringServiceError,
     log_notification_handler,
     alert_notification_handler
@@ -17,7 +17,7 @@ from traceone_monitoring.models.notification import NotificationType
 
 
 @pytest.mark.services
-class TestTraceOneMonitoringService:
+class TestDNBMonitoringService:
     """Test cases for TraceOne monitoring service"""
 
     def test_initialization(self, monitoring_service, app_config):
@@ -32,11 +32,11 @@ class TestTraceOneMonitoringService:
 
     def test_from_config_file(self, temp_config_file):
         """Test creating service from config file"""
-        service = TraceOneMonitoringService.from_config(temp_config_file)
+        service = DNBMonitoringService.from_config(temp_config_file)
         
         assert service.config.environment == "test"
         assert service.config.debug is True
-        assert service.config.traceone_api.api_key == "test_api_key"
+        assert service.config.dnb_api.api_key == "test_api_key"
 
     def test_from_config_env(self):
         """Test creating service from environment variables"""
@@ -45,8 +45,8 @@ class TestTraceOneMonitoringService:
             'TRACEONE_API_SECRET': 'env_api_secret',
             'ENVIRONMENT': 'test'
         }):
-            service = TraceOneMonitoringService.from_config()
-            assert service.config.traceone_api.api_key == 'env_api_key'
+            service = DNBMonitoringService.from_config()
+            assert service.config.dnb_api.api_key == 'env_api_key'
 
     def test_create_registration_from_config(self, monitoring_service, sample_registration_config):
         """Test creating registration from config"""
