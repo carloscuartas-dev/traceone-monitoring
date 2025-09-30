@@ -1,0 +1,53 @@
+{
+  "start_time": "2025-09-23T13:53:00.910631",
+  "tests_run": [
+    {
+      "name": "authentication_test",
+      "success": true,
+      "timestamp": "2025-09-23T13:53:01.323922"
+    }
+  ],
+  "errors": [
+    {
+      "stage": "notification_pull",
+      "registration": "TRACE_Company_info_dev",
+      "error": "'Notification' object has no attribute 'deliveryTimeStamp'",
+      "timestamp": "2025-09-23T13:53:02.560605"
+    }
+  ],
+  "registrations_created": [
+    {
+      "id": "e6bb1d99-26f0-4d65-ba55-dad1913fe0ab",
+      "reference": "TRACE_Company_info_dev",
+      "duns_count": 5,
+      "created_at": "2025-09-23T13:53:01.324761",
+      "duns_list": [
+        "001017545",
+        "001211952",
+        "001316439",
+        "001344381",
+        "001389360"
+      ]
+    }
+  ],
+  "notifications_received": [],
+  "files_stored": [],
+  "storage_info": {
+    "local_storage": {
+      "enabled": true,
+      "path": "./test_results",
+      "format": "json",
+      "files_found": 0,
+      "directories": 0,
+      "example_files": []
+    },
+    "sftp_storage": {
+      "enabled": false
+    },
+    "database": {
+      "url": "sqlite:///./real_test_results.db"
+    }
+  },
+  "end_time": "2025-09-23T13:53:02.561283",
+  "duration_seconds": 1.650652
+}

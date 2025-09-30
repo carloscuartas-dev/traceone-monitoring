@@ -1,0 +1,875 @@
+--- Page 1 ---
+THIRD PARTIES INTEGRATION PROCESSDirect +
+
+--- Page 2 ---
+2
+1.What is the DUNS number ?
+2.Focus on the API -based third parties management 
+lifecycle
+3.Search process
+4.Enrichment process on identity data
+5.Monitoring portfolio management
+6.What is the SEED file ?
+7.How to deal with monitoring ?
+AppendicesA G E N D A
+A s s u r e r  u n e  
+q u a l i t é  d a t a  
+o p t i m a l e
+
+--- Page 3 ---
+The DUNS number
+International identification number for 
+third parties
+
+--- Page 4 ---
+4D-U-N-S 
+Number 
+(Data Universal 
+Numbering System)-Created in 1962 in the United States
+-Trademark registered and used by D&B
+-Unique identification system for all companies 
+(natural or legal persons) and organisations
+(humanitarian, governmental, etc.) with a recognised
+existence and activity.
+-Internationally Recognized
+-Used notably by the United Nations (1991).
+-The United States Federal Government (1994)
+-The European Commission (1995) -9-digit number
+-Exclusively allocated and managed by D&B, its 
+subsidiaries and partners (free registration)
+-More than 265 million companies referenced
+-In more than 220 countriesThe DUNS number
+We first identify a third partie before enriching its data
+
+--- Page 5 ---
+5The following  are eligible
+oAny company with alegal category (SA, SARL,
+EURL, SAS, etc.)
+oSecondary establishments, such asabranch
+oThe professions
+oAny non-profit organization, such asan
+association
+oAny public orgovernmental entity and their
+subdivisions
+oP.O.BoxesThe following are not eligible
+oIndividuals not engaged in their own
+commercial activity
+oFixed assets that donot have thecharacter of
+secondary establishments (construction sites,
+distributors, etc.)
+In France, the attribution of a Duns is 
+subject to the prior existence of a Siret!Who can be 
+granted a 
+DUNS?The DUNS number  - Eligibility
+
+--- Page 6 ---
+6The Duns number -Basic Rule
+Never reused or reallocated to another entity
+Audit and control system implemented in each site (country or geographical area). 
+Its mission :
+-Preventing the reuse and/or reallocation of a pre -existing DUNS number
+-Avoid the loss of relevant data by reconciling duplicates (if the same company had been allocated to 2 Duns)
+-Maintain a database of deleted Duns with an indicator showing the reason for the deletion and, if possible, the Duns that rep laced 
+it.
+
+--- Page 7 ---
+Focus on the API -based third parties 
+management lifecycle
+
+--- Page 8 ---
+8Referential  management - The workflow
+•Identification
+•Enrichment and 
+integration
+Recovery of the 
+existing data•Identification (search)
+•Enrichment
+•Placing under monitoringIntegration of a new third 
+party
+•Retrieval and integration of 
+updates
+Monitoring
+The sustainable management of a referential
+
+--- Page 9 ---
+9The APIs
+Features API method
+Token retrieval for identification purposes https://plus.dnb.com/v2/ token
+Company Search and Identification https://plus.dnb.com/v1/match/ cleanseMatch?
+Enriching data of company https://plus.dnb.com/v1/data/duns/ DUNSNumbe r?blockIDs= xxxx
+Monitoring : Differents API to manage the Monitoring Portfolio 
+(RegistrationID )Described  later  in the document ( § Monitoring)
+Monitoring : Integration of data updates Download files from FTP
+Information Description
+Exchange protocol REST/JSON
+Adding  and removal  of company  monitoring API call with  txt file containing  DUNSs  as an imput
+Monitoring updates retrieval Retrieval  of a txt file containing  JSON response  from  ftp server
+Number  of simultaneous  API calls 5 calls per second
+
+--- Page 10 ---
+10Third  party integration  process
+Third  parties referiential
+Data enrichment  of companyRetrieval  of identification token
+New third  party search
+Token  retrieved
+New third  party search
+List of probable third parties
+List of probable third parties
+Data enrichment  of company  (call of DataBlocks )
+Data blocks enrichedData enriched
+Monitoring of the companies integrated during the day
+Integration  feedbackCompanies  Monitoring Batch
+
+--- Page 11 ---
+The Identification Token
+
+--- Page 12 ---
+12The identification token
+Purpose  : Retrieving a token to identify yourself when querying Direct+ Services
+Detailed  documentation : https://directplus.documentation.dnb.com/openAPI.html?apiID=authentication
+Credencial  = Base64Client
+HttpResponse <String> response  = Unirest.post ("https://plus.dnb.com/v2/ token ")  
+.header(" Content -Type ", "application/ json")  
+.header(" Authorization ", "Basic  Rxxxxs5R0Q6VHNJdXh4NHA4RkxzN2VDaA== ")  
+.body("{ \"grant_type \" : \"client_credentials \" }")  
+.asString ();Call parameters
+Returned  informationToken  information:
+-access_token  : token  number
+-expiresIn  : expressed  in seconds {    
+"access_token ": "k8wf061Fn4ZO4H4L5xA4CIOy7DNA ",    
+"expiresIn ": 86400
+}Token  retrieval : https://plus.dnb.com/v2/token
+Token  available  for 24 hours
+Java code snippetEncrypting Base 64 (Login : password)
+
+--- Page 13 ---
+Search  process
+Company  identification
+
+--- Page 14 ---
+14Search  method  – cleanseMatch  – call sequence
+Purpose  : Search  for a third  party
+Detailed  documentation : https://directplus.documentation.dnb.com/openAPI.html?apiID=IDRCleanseMatch
+Client
+Method URL: https://plus.dnb.com/v1/match/cleanseMatchQuery  parametersParameter Description Example
+autorization Identification token  mandatory HttpResponse <String> response  = 
+Unirest.get ("https://plus.dnb.com/v1/match/ cleanseMatch ?name =Gorman+Manufacturing& street
+AddressLine1 =492%20KOLLER%20STREET& countryISOAlpha2Code =US& addressLocality =SAN%20F
+RANCISCO& addressRegion =CA& postalCode =94110& telephoneNumber =6505550000")  
+.header(" Authorization ", "Bearer  LwVDAj50Ow6kPsuHu1NCb8qJsSZc")  
+.header("Origin", "www.dnb.com")  
+.header("cache -control", "no -cache")  
+.asString ();Name company name or trade name or former name
+Country code ISO 2 format mandatory
+PrimaryAddress Primary  address
+Telephone Telephone  number
+RegistrationNumbersLocal identifier (with its code to be specified in 
+the tag registrationNumberType )
+ConfidenceLowerLevelThresholdValue Quality of the match (max 10) recommended : 8
+CandidateMaximumQuantity Maximum number  of returned  third  parties 
+A list of third parties matching the search criteria :Query  feedbackFeedback info Description Example
+Duns international company identifier
+primaryName Company reason
+tradeStyleNames Trade name
+primaryAddress Quality of the match
+mostSeniorPrincipals The principal officer
+registrationNumbers A local identifier
+matchGradeQuality of the match (max 10) 
+(Tolerance 8)
+Match identity  information
+Match qualityInformation for selecting the right company to be enriched
+
+--- Page 15 ---
+15Search  method  – cleanseMatch  – other  query  parameters
+Parameter Description
+customerBillingEndorsementInformation provided by the Customer and used for Internal Billing. This may include the name of a person, service or any 
+other useful information that identifies the "Consumer" of the Service. Not Mandatory
+candidateMaximumQuantityLimits the number of candidates returned by the search. By default this value is the 10 most probable. Not Mandatory
+confidenceLowerLevelThresholdValueMinimum quality level of matching candidates to be returned. It is related to the value of the confidenceCode
+response. Not Mandatory
+exclusionCriteriaExclusion parameters of the candidates searched for. No Mandatory
+• ExcludeNonHeadQuarters : Returns only the headquarters of the companies
+• ExcludeNonMarketable : Returns commercially active companies
+• ExcludeOutofBusiness : Returns only active third parties
+• ExcludeUndeliverable : Returns companies with a physical address
+• ExcludeUnreachable : no contact information for the company ( tel, fax, email)
+Example: ... & exclusionCriteria =ExcludeNonHeadQuarters%2CExcludeNonMarketable
+isCleanseAndStandardizeInformationRequiredPresents the Standardization of Address Parameters on which the search was based to perform the search on the third 
+party's address. Not Mandatory
+Ex : 
+Search  addressLocality  = «ST FRANCISCO » 
+ Standardized  addressLocality = «SAN FRANCISCO » 
+ true :  taken into account.
+false :  not taken into account( defaut )
+
+--- Page 16 ---
+16Search  method  – cleanseMatch  – other  query  feedbacks
+Paramètre Description
+candidatesMatchedQuantityNumber of Candidates returned by search criteria
+matchDataCriteriaType of match made for the search:
+• DUNS Number Lookup: If the Duns is passed in parameter only this parameter is taken into account.
+• Name and Address Lookup: If the name or address is filled in
+• National ID Lookup : If the local id is filled in, it has priority (but after DUNS)
+• Telephone Number Lookup: If it is the only one to be filled in
+displaySequenceOrder of appearance of the candidate in the answer. Candidates appear in the answer in descending order of 
+probability of matching. (Most likely first)
+operatingStatusReturns the status of an applicant. 2 possibilities: active or out of business
+
+--- Page 17 ---
+17Search  method  – cleanseMatch  – Match quality  1/3
+Description : Provide information on the quality of the Match for each third party returned
+matchQualityInformation
+Overall rating on the quality of the match. This score consolidates the matchGrade scores
+Ex : 8
+matchGradeconfidenceCode
+matchGradeComponentsCount
+matchGradeComponents
+matchDataProfile
+matchDataProfileComponentsCount
+matchDataProfileComponents
+nameMatchScoreProvides a grade for each element that helped identify the third party.
+Each grade compares the value passed as a parameter and the value returned for the third party in question.
+Ex : ABAAZZZFFZZ
+Technical  rating on matching
+Ex : 0000000000989896000000009898Number of elements tested to define the matchGrade . This value is usually 7
+Ex : 7
+Describes for each element of the matchGrade the grade. The number of elements corresponds to the 
+matchGradeComponentsCount
+Ex "componentType ": "Name",                        
+     "componentRating ": "A"
+Number  of tested  elements  to define  the matchDataProfile
+Explains for the values tested what the comparison was based on.
+Ex : " componentType ": "Name",                        
+        "componentValue ": "00«        => Business Name
+Summarizes how the search was validated
+Ex : Name and Address  Lookup
+
+--- Page 18 ---
+18Search  method  – cleanseMatch  – Match quality  2/3
+Grade Definition Example
+A values considered identical Altares / Altares D&B
+B Values with strong similarities Groupe Galaxie / Groupe Galaxie n’Co
+F Values considered to be different Etablissement Eloi Pernet / EURL Saint Eloi
+Z No values for comparison Pas de donnée envoyée dans la requêteDefinition
+1-name 6-URL ( mai or domain)
+2-Street number 7-Telephone number
+3-Street name 8-Postal Code
+4-City9-Density (Number of companies with the same 
+postal code)
+5-Country/state10-Uniqueness (number of a search for this name in 
+a region or country)
+11-SIC : Activity codematchGrade
+A A A B A Z B F A Z BName
+Street numStreet name
+VilleState
+URLTelephone
+Code PostalDensity
+UniquenessSICTested  valuesGrades
+For confidenceCode high weighting of the address in comparison to 
+the company name
+Information used by Direct+'s Cleansematch research 
+
+--- Page 19 ---
+19Search  method  – cleanseMatch  – Match quality  3/3
+matchDataProfileComponents
+Code Match To Notes
+00 Primary Name.
+01 Registered Name.
+02 Trade Style Name.Not applicable for US and 
+Canada
+03 Name of CEO or other primary contact.
+04 Additional Executive Name.
+05 Former name.
+06 Former Tradestyle Name. Reserved for future use.
+07Name of former CEO or other primary 
+contact.
+08 Former Executive  Name. Reserved  for future use.Type of name in D&B base or the name passed in parameter matched
+Code Matched  To
+00 Physical Address
+01 Registered Address
+02 Former Physical Address
+03 Additional Address
+98 No D&B Data exists for this field
+99 No Data in inquiry for this fieldType of address in D&B base or the 
+address passed as a parameter to match
+Code Matched  to
+00 Current  Phone
+02 Former Phone
+98 No D&B Data exists for this field
+99 No Data in inquiry for this fieldType of phone number in D&B base or the 
+phone set in parameter has matched
+The other tables are described in the online documentation : 
+https://directplus.documentation.dnb.com/html/guides/Identify/IdentityResolution.html#appendix -match -data -profile -mdp -codes -referenceThe following lists allow you to define on which element a search criterion has been matched. Example in the case of a match on a company 
+name, on which type of name did the match take place? Company name, Business name, Former company name, ...
+
+--- Page 20 ---
+Data enrichment process 
+(DataBlocks )
+
+--- Page 21 ---
+21Enrichment  – Data Blocks – Query  workflow
+Purpose  : Retrieving blocks of data and integrating it into an MDM/CRM/SRM for a new entrant
+Complete documentation : https://directplus.documentation.dnb.com/DataBlocks.html
+Client
+Method URL : https://plus.dnb.com/v1/data/duns/381633528?blockIDs=xxxQuery  parametersPparameters Description Example
+Autorisation              ( Mandatory ) Identification token HttpResponse <String> response = Unirest.get ("https://plus.dnb.com /v1/data/duns/275454064?blockIDs= companyinfo_L2_v1, 
+hierarchyconnections_L1_v1, principalscontacts_L2_v1
+.header("Authorization", "Bearer b5nqs82809B4i4h1")  
+.asString ();dunsNumber              (Mandatory ) The DUNS to be enriched
+blockIDs                       (Mandatory )Data blocks that we want  to retrieved
+(Example : xxx = companyinfo_L2_v1, 
+hierarchyconnections_L1_v1, principalscontacts_L2_v1)
+tradeUp                       (Option) Return systematically  the headquarter
+orderReason              (Mandatory  for
+                                      Risk Datablocks )A D&B code value that defines the grounds for the 
+customer request
+A list of data corresponding to the blocks requested of the DUNS:Query  feedbackReturned  information Example
+The informations returned  will depend  on the type of data requested .
+You’ll  find all the type of data that can be retrieved , with  different  depths  :
+•Hierarchy  & Connections
+•Ownership  Insights
+•Company  Financials
+•Payment  Insights
+•Principals  & Contacts
+•Filing  & Events
+•Company  Entity  Resolution
+•Company  Information
+•Diversity Insights
+•Financial Risk Insights
+•Company  News
+•Industry  ProfileConnexion tokenDuns
+
+
+--- Page 22 ---
+22Standard Data Blocks
+•Enables you to retrieve data on a specific entity or category. 
+•In a single online API request, multiple data blocks can be pulled. 
+•Monitoring and Batch are supported for all elements of standard data blocks.
+Documentation
+•List of Data Blocks and definition 
+•Generate the API specification and the full Path
+➔https://directplus.documentation.dnb.com/DataBlocks.htmlEnrichment  – List of DataBlocks  and Definition
+
+--- Page 23 ---
+23Enrichment  – differents  calls
+Some data may notbepresent intheDuns ofthedivision that you arequerying .Infact, some data willonly bepresent atthe
+level ofitsheadquarters Duns .
+Example  : 
+•Ifyou query theDuns ofAltares’Division inLyon forRisk data (Financial Strength Insights), IwillnotgetanyRisk data .
+•TogetthisRisk data, you have toquery theDuns ofitsheadquarters inColombes
+DataBlocks  «All duns » DataBlocks  «Headquarters »
+- Company  Information
+- Hierarchies  & Connections- Company  Financials
+- Filings  & Events
+- Financial Strength  Insights
+- Ownership  Insights
+- Payment  Insights
+- Principals  & ContactsData available  for all duns 
+(Divisions & Headquarters )Data available  only  for headquarters
+
+--- Page 24 ---
+24Main Parameters Description Example
+Autorisation           (Obligatoire) Token  d’authentification HttpResponse <String> response = Unirest.get ("https://plus.dnb.com /v1/data/duns/275454064?blockIDs= companyinfo_L2_v1, 
+hierarchyconnections_L1_v1, principalscontacts_L2_v1
+.header("Authorization", "Bearer b5nqs82809B4i4h1")  
+.asString ();dunsNumber           (Obligatoire) Duns à enrichir 
+blockIDs                    (Obligatoire)Liste des Data blocks « All Duns »
+(Exemple : xxx = companyinfo_L2_v1, hierarchyconnections_L1_v1)
+tradeUp                    (Option) Retourne systématiquement le Duns Siège ( Mettre à vide )
+orderReason            (Obligatoire pour
+                                     les Blocks Risk)Une valeur de code D&B qui définit les motifs de la demande du 
+client.Enrichment  – Call Datablocks  «All duns »
+Purpose  : Get the data from the “All duns" Datablocks and integrate them  into an MDM/CRM/SRM in the context of a new entrant
+Detailled  documentation : https://directplus.documentation.dnb.com/html/guides/Enrich/StandardDataBlocks.html
+Client
+Call Method URL : https://plus.dnb.com/v1/data/duns /381633528 ?blockIDs=xxx &orderReason=6332Call parameter Data returnedReturned  information Return example
+The data returned depends on the Datablocks requested. 
+For details see the online documentationList of blocksDuns
+
+
+--- Page 25 ---
+25Main Parameters Description Example
+Autorisation           (Obligatoire) Token  d’authentification HttpResponse <String> response = Unirest.get ("https://plus.dnb.com /v1/data/duns/275454064?blockIDs= Company  Financials _L1_v1, 
+tradeUp =hq
+.header("Authorization", "Bearer b5nqs82809B4i4h1")  
+.asString ();dunsNumber           (Obligatoire) Duns à enrichir 
+blockIDs                    (Obligatoire)Liste des Data blocks « Headquartgers »
+(Exemple : xxx = Company  Financials _L1_v1,…)
+tradeUp                    (Option) Retourne systématiquement le Duns Siège ( Mettre hq )
+orderReason            (Obligatoire pour
+                                     les Blocks Risk)Une valeur de code D&B qui définit les motifs de la demande du 
+client.Enrichment  – Call Datablocks  «Headquarters  » 1/2
+Purpose  : Get the data from the “Headquarters" Datablocks and integrate them  into an MDM/CRM/SRM in the context of a new entrant
+Detailled  documentation : https://directplus.documentation.dnb.com/html/guides/Enrich/StandardDataBlocks.html
+Client
+Call Method URL : https://plus.dnb.com/v1/data/duns /381633528 ?blockIDs=xxx &orderReason=6332 &tradeUp =hqCall parameter Data returnedReturned  information Return example
+The data returned depends on the Datablocks requested. 
+For details see the online documentationList of blocksDuns
+tradeUp
+
+--- Page 26 ---
+26Enrichment  – Call Datablocks  «Headquarters  » 2/2
+The integrated information is that of the headquarters. We must therefore save the data specific to the third party and those specific to 
+its headquarters on the third party's file.
+https://plus.dnb.com/v1/data/duns/274845849?blockIDs=financialstrengthinsight_L2_v1& tradeUp=hq &orderReason=6332
+Third  party
+Duns HQ = 275454064
+- Risk
+- Paydex Request  in headquarter  duns  
+274845849
+The API returns  the HQ Duns 275454064 
+which  should  be saved  for the monitoring
+Data establishment
+Data HQProcessed  duns  = 274845849
+- Adrdess
+- NameIf all this information is to be monitored, 2 monitoring 
+portfolios will have to be created.
+-1 on the Duns establishment with associated datablocks
+-1 on HQ Duns with associated datablocks
+
+--- Page 27 ---
+Monitoring portfolio 
+management
+
+--- Page 28 ---
+Preparation and Creation 
+of the Monitoring PortfolioUsing the Monitoring Portfolio
+& Notification Retrieval
+1 - 
+Registration 
+framing2 - 
+Monitoring 
+APIs3 - Updates 
+managementMonitoring process - Workflow
+Purpose  : To allow to receive updated information of the companies under monitoring of the client in order to keep up to date his Datab ase
+Detailed  documentation : https://directplus.documentation.dnb.com/html/guides/Monitor/Monitoring.html
+- Download updates file
+- Updates integration- Add companies  to the monitoring
+- Remove  companies  from  
+monitoring portfolio
+-To activate notifications delivery - Name of the Monitoring Portfolio
+- Informations to be monitored
+- Data exchange protocol
+- Etc.
+From a billing perspective, it is the unique number of DUNS monitored over the year (even if addition / 
+cancellation many times).
+Activate the 
+sending of 
+notifications
+
+--- Page 29 ---
+1 – Registration Framing
+▪The Registration is a portfolio of duns for which the client wants to follow all the modifications (for 1 or many Datablocks , 
+example «companyinfo_L2_v1, principalscontacts_L1_v1 »).
+▪The Registration is created by D&B with the parameters defined by the client and Altares project manager.
+▪It takes 7 working days to create this watch called Registration .
+3- Registration creation
+5- Email confirming  the FTP and Registration creation
+7- Warning email for the rejected  DUNS1 – Validate  the 
+Registration
+parameters2- Creation  request
+4- FTP folder creation
+6 – Error  file containing  the rejected  DUNS
+8- Recovery  file (header + SEED)
+CLIENTProject manager
+
+--- Page 30 ---
+Parameters  of REGISTRATION Description
+Reference : The name  allowing  to identifiy  the 
+registration ( RegistrationID )This name will be used in the files containing the updates and in the WebService calls related to the monitoring. Cannot be modified
+Universe  or LOD : What  do i want  to monitorIn our case we will monitor a list of Duns (LOD). For marketing purposes possibility to monitor a segmentation (UNIVERSE) e.g . 
+companies created in a country on a certain activity. Cannot be modified
+seedData  : Do i need  a seed  file?➔true or false 
+Only at the creation of the Registration and within the framework of the data transfer I attach a list of Duns to be enriched . The 
+result will be a .txt file containing the JSON Datablocks enrichment of the Duns.
+Cannot be modified
+DataBlocks  : List of Datablocks  is used  for monitoringPut the Direct+ Datablocks names ( example «companyinfo_L1_v1, principalscontacts_L1_v1 ») 
+Cannot be modified
+notificationType  : what  should  be the updates file 
+content ?FULL_PRODUCT -I receive for one Duns Update all the registration  
+To be used for the complete DUNS update
+UPDATE -Gives us only data before update and data after update.
+To be used to display an alert list to know the modified data of a DUNS if needed.
+Not modifiable
+File management DELETE_AFTER_DOWLOAD : Delete automatically the file when it's downloaded (after 15 days, the file is automatically deleted)   
+KEEP_15_DAYS : Keep the file 15 days on the FTP  (file dowloaded or not). It's automatically deleted after this delay.
+Destination Type : File destination The file can be sent to either  D&B FTP or in Amazon S3 C annot be modified
+Notification Frequency :  How often would I like to 
+receive my notifications?DAILY (after  midnight  UTC)  / WEEKLY (Sunday after  midnight  UTC)  / MONTHLY (The 1th of the month  after  midnight  UTC)  
+JSON Path Inclusion Define the data for which we want monitoring
+JSON Path Exclusion Define  data for which  we don’t  want  monitoring
+Email Addresses  : mails for which  notifications are 
+sentAn email is sent when the Registration is updated. Several mails are possible. Modifiable
+
+--- Page 31 ---
+31Features Main APIs method
+Add duns to the monitoring and Delete duns from the monitoring –a list of duns once a day ( Scenario 1 )
+Add Companies to the monitoringhttps://plus.dnb.com/v1/ monitoring/registrations /{RegistrationID} /subjects
+HTTP verb  : PATCH
+Removal of company from the monitoringhttps://plus.dnb.com/v1/ monitoring/registrations /{RegistrationID} /subjects
+HTTP verb  : PATCH
+Add duns to the monitoring and Delete duns from the monitoring –duns by duns (Scenario 2 )
+Add 1 company to the monitoringhttps://plus.dnb.com/v1/ monitoring/registrations /{RegistrationID} /subjects/ {subjectID} /
+HTTP verb  : POST
+Remove 1 company from the monitoringhttps://plus.dnb.com/v1/ monitoring/registrations /{RegistrationID} /subjects/ {sujectID} /
+HTTP verb  : DELETE
+Other APIS
+To activate notifications delivery (once the SEED file is 
+managed)https://plus.dnb.com/v1/ monitoring/registrations /{RegistrationID} /subjects
+HTTP verb  :  DELETE 
+Export List of Duns in Registration
+(To check the list of duns under monitoring)https://plus.dnb.com/v1/ monitoring/registrations/export /{RegistrationID} /subjects
+D&B FTP
+Integration of data updates Download the files from the D&B FTPDocumentation of all the monitoring APIs : https://directplus.documentation.dnb.com/html/pages/MonitoringAPIs.html2a/ Monitoring APIs – List of main Apis (06/05/2022)
+subject=duns
+
+--- Page 32 ---
+2b/ Monitoring APIs –Activate the monitoring
+Purpose  : Once the Registration has been created and the SEED provided, the client has 1 month to manage the SEED file and activate the Registration monitoring 
+with this APIs.
+Detailed  documentation : https://directplus.documentation.dnb.com/openAPI.html?apiID=monSuppressNotifications
+Once this method is executed, we will be able to retrieve the notifications made since the creation of SEED. DELETE /v1/monitoring/registrations/ Registration_reference /suppress
+
+--- Page 33 ---
+2c/ Monitoring process – Add DUNS to the monitoring
+Purpose  : Add a list of duns  or a Single Duns to the monitoring
+Detailed  documentation : 
+https://directplus.documentation.dnb/openAPI.html?apiID=monAddSubjectsToRegistration
+https://directplus.documentation.dnb/openAPI.html?apiID=monAddSingleSubjectToRegistration       
+1- Generate  a file of Duns that still aren’t  under  monitoring (for scenario 1 )
+2 (Scenario 1 – Add a list of duns  to the monitoring) - Call the method  (POST) 
+https://plus.dnb.com/v1/monitoring/registrations/ Registration_reference /subjects / 
+ Attach  the Duns file CSV of ZIP , no header, one DUNS per line
+3- File containing  the rejected  DUNS
+4- Information email in case of monitoring errors
+2 (Scenario 2 – Add duns by duns  to the monitoring) - Call the method  (POST) : 
+https://plus.dnb.com/v1/monitoring/registrations/ Registration_reference /subjects/ {subjectI D} 
+ORsubject=duns
+
+--- Page 34 ---
+2d/ Monitoring process – Remove  DUNS under  monitoring
+Purpose  : remove  a list of DUNS or a Single DUNS from  the monitoring
+Detailed  documentation :
+https://directplus.documentation.dnb.com/openAPI.htmls?apiID=monRemoveSubjectsFromRegistration
+https://directplus.documentation.dnb.com/openAPI.html?apiID=monRemoveSingleSubjectFromRegistration  
+                
+1- Generate  a file of DUNS to remove  from  monitoring (for scenario 1 )
+2 (Scenario 1 – Remove  a list of duns  from  the monitoring) - Call the method  (PATCH) : 
+https://plus.dnb.com/v1/monitoring/registrations/ Registration_reference /subjects/ 
+ Attach  the DUNS file CSV of ZIP , no header, one DUNS per line
+3- File containing  errors  (duns  are still under  monitoring)
+4- Information email in case of errors
+2 (Scenario 2 – Remove  subject  by subject  from  the monitoring) - Call the method  (DELETE) : 
+https://plus.dnb.com/v1/monitoring/registrations/ Registration_reference /subjects/ {subjectID} / 
+ORsubject=duns
+
+--- Page 35 ---
+2e/ Monitoring process – List the DUNS under  monitoring
+Purpose  : Retrieve  the list of DUNS under  monitoring
+Detailed  documentation : https://directplus.documentation.dnb.com/openAPI.html?apiID=monExportSubjects
+https://directplus.documentation.dnb.com/html/pages/MonitoringAPIs.html#export -subject -list
+Each year upon renewal of the contract, all Duns still under monitoring will be automatically invoiced for the new year.
+Duns that need to be removed must therefore be removed before the renewal date of the contract.
+1- Retrieve  the list of DUNS under  monitoring
+https://plus.dnb.com/v1/monitoring/registrations/ export /Registration_reference /subjects
+2- Confirmation email
+3- File containing  the DUNS under  monitoring placed  in the folder
+Naming  pattern : REFERENCE_YYYYMMDDHHMMSS_ DunsExport _FILE -NUMBER.zip
+REFERENCE = Registration reference
+YYYYMMDDHHMMSS  Timestamp
+FILE-NUMBER = nbr de fichier / 1 fichier = 3Gosubject=duns
+
+--- Page 36 ---
+2f/ Monitoring process – Examples  of files
+Example export file
+Example of file errors  adding  
+suppressing  duns  to the 
+monitoring
+Example of file errors  adding  
+duns  to the monitoring
+Example of file attached  to the API 
+call to Add duns  to the monitoring
+Example of file attached  to the API 
+call to suppress  duns   from  the 
+monitoringsubject=duns
+
+--- Page 37 ---
+3 –Updates management 
+---
+What is the SEED file ?
+
+--- Page 38 ---
+The Seed File is usefull to know the updates in the delay of registration creation.3 –Updates management -Seed file structure
+Information Description
+Content Enrichment of all Duns in the LOD file associated with the Registration creation request
+Leadtime Within 7 working days of the request to create the Registration
+Format .zip file containing the DataBlocks enrichments of the Duns provided at the creation of the Registration
+Deliverables 1 line => 1 enriched Duns
+Number  of enriched  DUNS
+List of files containing  the enrichment  dataIndicate  that we are in the SEED file header
+
+--- Page 39 ---
+SEED File - example
+Same  data structure than  the DataBlocks1 line per enriched  DUNS
+
+
+--- Page 40 ---
+3 –Updates Management 
+•List of files
+•How to manage the monitoring ?
+
+--- Page 41 ---
+Provision to the Client of alerts corresponding 
+to the duns in his portfolio
+When there is a change in the D&B database, an 
+update alert is created on the Duns concerned.1
+Retrieval of all alerts related to 
+Duns in the Client's Portfolio
+34Update delivery  process
+2
+Download the files from  the FTP 
+and update  the client ReferentialClient referential D&B base
+
+--- Page 42 ---
+Files to download from  the FTP
+Information Description
+Content Enrichment of all Duns in the file associated with the Registration creation request
+Leadtime Files delivered within the deadline set in Registration
+Format.zip file containing the Datablocks enrichments of the Duns provided at the creation of the Registration
+1 line => 1 Update alert if in UPDATE mode (N possible alerts / Duns). Notifications arrive ordered by DUNS and date of 
+creation.
+1 line => 1 Duns as soon as it has been updated if in FULL_PRODUCT mode. 1 Duns per Event Type
+Deliverables•HEADER file: Describes the update files and synthesizes their contents.
+•The Duns update file(s) (NOTIFICATION) -3Gb max if not several files -Zip File
+•Duns in error therefore not monitored (EXCEPTIONS)
+Namming  pattern : 
+REFERENCE _YYYYMMDDHHMMSS _FILE -TYPE _FILE -NUMBER
+•REFERENCE = Reference given to the registration
+•YYYYMMDDHHMMSS = Timestamp of file creation
+•FILE -TYPE = Type of file (by content) : EXCEPTIONS / NOTIFICATION / HEADER :
+•FILE -NUMBER = File number (not available for headers)Provided  files :
+
+--- Page 43 ---
+HEADER file example
+UPDATE mode
+File information NOTIFICATION: same as SEED file
+Summary of the contents of the NOTIFICATION file
+
+--- Page 44 ---
+Notification file example
+FULL_PRODUCT Mode
+UPDATE modeCommon structure between the 2 types of updates
+Only the types differ•Here we'll have the enrichments of the Duns that had an update alert
+•The Duns have just been added to Registration
+
+--- Page 45 ---
+Notification Type Values FULL_PRODUCT UPDATE
+DELETE One DUNS has been deleted X X
+EXIT A DUNS is no longer part of the surveillance (rare!) X X
+REVIEWED One DUNS has been placed under surveillance; notifications will be sent later X X
+TRANSFER One DUNS was transferred to another DUNS. X X
+UNDELETE A DUNS is no longer deleted X X
+UNDER_REVIEWA DUNS is currently being processed. No notification of changes will be received while the DUNS is in this 
+status.X X
+UPDATE The content related to the DUNS topic has been updated. . X
+SEED When a DUNS is added to monitoring in UPDATE mode or when a change occurs in FULL_PRODUCT mode X XNotification file – possible types 1/2
+
+--- Page 46 ---
+Activity :
+Activity Notification Types for LOD Registrations Description
+A DUNS is indicated as deletedUPDATE or SEEDAll pending notifications for the registered DUNS number before it is deleted will be sent. 
+However, while the DUNS number has the status deleted, no further update notifications 
+will be sent. UPDATE or SEED depends on the " notificationType " setting in the Portfolio.A DUNS is no longer deletedDELETE
+Changes to data in a DUNS, this may include: New 
+content, deleted content and updated content.UNDELETEFor universe registration, a SEED record is included only if Registration a Seed File = 
+True.
+DUNS -A is transferred to DUNS -B; DUNS -A was in the 
+portfolio. DUNS -B is no longerSEEDFor the LOD record, a SEED record is included if Registration for Seed File = True OR 
+notificationType is FULL_PRODUCT.
+DUNS -A is transferred to DUNS -B; DUNS -B was in the 
+portfolio; DUNS -A is no longer in the portfolio.UPDATE UPDATE depends on the Registration notificationType setting.
+DUNS is currently under review.(DUNS -A)
+TRANSFEREdit the record to delete DUNS -A and add DUNS -B.
+Revision of DUNS is finalized¨Pas de notification envoyée
+DUNS is removed from the watch list.UNDER_REVIEW
+DUNS is under review AND is being transferred REVIEWED SEED is only included if the registration includes the SEED application.
+A DUNS is indicated as deletedREMOVED
+A DUNS is no longer deletedTRANSFERNotification file – possible types 2/2
+
+--- Page 47 ---
+Appendices
+
+--- Page 48 ---
+Miscellaneous  questions
+
+--- Page 49 ---
+Is data update available  for all countries?
+Yes for all
+Is it necessary to pay for a report again if we consult it again? 
+Multiple consultation is based on the contractual year. A Duns consulted several times over the 
+contractual year will only be charged once for that year. If a request is made for a new year then in that 
+case there will be a new billing for that new year.
+Limit on the number of DUNS for the test account ?
+The user provided for the tests is set for 300 DUNS. If an overrun is observed an invoicing can be made. 
+This is why it is advisable to use PROD DUNS if tests with larger volumes have to be carried out.
+
+--- Page 50 ---
+NOTIFICATION file structure in 
+UPDATE mode
+
+--- Page 51 ---
+{ 
+"element ":"organization.registeredAddress.streetName ", 
+"previous ":"BUILDING 4, HATTERS LANE, CROXLEY GREENBUSINESS PARK", 
+"current ":"BUILDING 4, HATTERS LANE", 
+} Element  modification
+{ 
+"element ": "organization.industryCodes ", 
+"previous ": [ 
+{ "typeDescription ": "North American Industry  Classification System 2012", "description": " Unclassified  Establishments", " priority ": 1, "code": "999990", 
+"typeDnBCode ": 24664 }, 
+{ "typeDescription ": "D&B Hoovers  Industry  Code", "description": " Nonclassifiable  establishments", " priority ": 1, "code": "2058", " typeDnBCode ": 25838 }
+]
+"current ": [          
+{
+"code": "238210", 
+"description": "Electrical Contractors",
+"typeDescription ": "North American Industry Classification System 2012",
+"typeDnBCode ": 24664,
+"priority": 1
+}
+]Array  of elements  modifcationExample of NOTIFICATION file in UPDATE mode -Type Update  1/2 
+
+--- Page 52 ---
+{
+    "element ":"organization.telephone ",
+    "previous ": [
+        {
+          "telephoneNumber":"5555551212",
+          "isdCode":"86",
+          "isUnreachable ":false
+        }
+     ],
+     "current ": [
+        {
+          "telephoneNumber":"5555551000",
+          "isdCode":"86",
+          "isUnreachable ":false
+        }
+     ],
+     "timestamp":"2016 -07-29T13:22:19Z"
+}Values modifications
+{ 
+"element ":"organization.telephone ", 
+"previous ":[], 
+"current ":[ 
+{ 
+"telephoneNumber":"57687353158", 
+"isdCode":"86", 
+"isUnreachable ":false 
+} 
+], 
+"timestamp":"2016 -07-29T13:22:19Z" 
+} Values adding
+{
+ "element ":"organization.telephone ", 
+"previous ": [ 
+{ 
+"telephoneNumber":"5555551212", 
+"isdCode":"86", 
+"isUnreachable ":false 
+} 
+], 
+"current ":[] 
+} Values removalExample of NOTIFICATION file in UPDATE mode -Type Update  2/2 
+
+--- Page 53 ---
+Company  lifecycle
+Case studies
+
+--- Page 54 ---
+Is DUNS A kept ?
+541 .  R e l o c a t i o n  o f  t h e  h e a d  o f f i c e
+DUNS A is kept  indeed !
+→ Company  information updateOld head  
+office
+(DUNS A)
+New location
+
+--- Page 55 ---
+552 .  R e l o c a t i o n  o f  h e a d q u a r t e r s  t o  a  s e c o n d a r y  
+f a c i l i t y
+Is DUNS A kept ?
+Is DUNS B kept ?
+DUNS B is deleted !
+→ Activities related to the head officeHeadquarter
+ (Duns A)
+Secondary  facility
+(Duns B)DUNS A is kept  indeed !
+→ Company  information update
+
+--- Page 56 ---
+563 .  R e l o c a t i o n  o f  a  s e c o n d a r y  f a c i l i t y
+Secondary  facility
+(Duns A)
+New localisationIs DUNS A kept  ?
+DUNS A switch to « inactive » status
+→ Creation of a new DUNS corresponding 
+to the new location
+
+--- Page 57 ---
+574 .  R e l o c a t i o n  o f  a  s e c o n d a r y  f a c i l i t y  t o  t h e  
+l o c a t i o n  o f  a n o t h e r  e x i s t i n g  s e c o n d a r y  f a c i l i t y
+Secondary  facility  1 
+(Duns A)Secondary  facility  2 
+(Duns B)Is DUNS A kept  ?
+DUNS A switch to « inactive » status !
+→ Activity is attached  to DUNS B
+Is DUNS B kept ?
+DUNS B is kept  indeed !
+
+--- Page 58 ---
+Headquarter  
+(Duns B)Headquarter  
+(Duns A)
+585 .  R e l o c a t i o n  t o  a  f o r e i g n  c o u n t r y
+Is DUNS A kept  ?
+Creation of a new legal entity as a result 
+of the change of countryDUNS B creationDUNS A switch to 
+«inactive » status
+
+--- Page 59 ---
+596 .  M & A
+Headquarter  (DUNS A)
+Headquarter  
+(DUNS B)Headquarter  
+(DUNS C)A merges with B and CIs DUNS A kept  ?
+DUNS A is kept ?
+Are DUNS B and C kept ?
+DUNS B and C are deleted
+➔Activity is atttached  to DUNS A
+
+--- Page 60 ---
+CAS 1 : Une entreprise est vendue  ou la part 
+majoritaire change de propriétaire, le Duns du siège 
+est conservé  à condition de garder la même activité.
+Company  (Duns A)
+100% sold Change of principal shareholder
+DUNS A kept
+(If similar  activity )7 .  C o n t r o l  c h a n g e s
+CAS 2 : Un établissement secondaire est vendu ou 
+devient une entité légale indépendante, son DUNS 
+devient inactif et un nouveau lui est attribuéSecondary  facility (Duns A)
+Sold Spin off
+DUNS A deleted
+New legal  entity  do 
+new DUNS
+
+--- Page 61 ---
+DunsSummary on the follow -up of a DUNS
+Existant / EntréesCase Impact Recommended  action
+Closing  The DUNS is disabled. If transfer known, (relocation, 
+merger, takeover, etc.): presence of a successor.Plan to replace the DUNS by its successor
+Headquarter  relocation The DUNS follows the address of the head office If it’s for the HQ DUNS, we update the 
+address
+

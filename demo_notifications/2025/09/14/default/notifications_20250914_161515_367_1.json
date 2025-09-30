@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "export_timestamp": "2025-09-14T16:15:15.367334Z",
+    "notification_count": 1,
+    "format_version": "1.0",
+    "storage_type": "local_file"
+  },
+  "notifications": [
+    {
+      "id": "12ae806d-04af-4a1b-82ff-fcc89c2f5521",
+      "type": "UPDATE",
+      "organization": {
+        "duns": "123456780"
+      },
+      "elements": [
+        {
+          "element": "organization.primaryName",
+          "previous": "Old Company 1",
+          "current": "Mock Company 1",
+          "timestamp": "2025-09-14 18:15:15.018530"
+        },
+        {
+          "element": "organization.primaryAddress.addressLocality.name",
+          "previous": "Old City",
+          "current": "Demo City",
+          "timestamp": "2025-09-14 18:15:15.018553"
+        }
+      ],
+      "delivery_timestamp": "2025-09-14 18:15:15.018566",
+      "processed": false,
+      "processing_timestamp": null,
+      "error_count": 0,
+      "last_error": null
+    }
+  ]
+}

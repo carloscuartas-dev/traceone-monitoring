@@ -1,0 +1,330 @@
+--- Page 1 ---
+Integration process
+Pull API MonitoringDirect +
+
+--- Page 2 ---
+General information
+
+--- Page 3 ---
+Define  
+monitoringMy monitoring 
+stepsManage updatesNotification Process: macro -steps
+Objective: To enable the receipt of company update information from my database in order to keep this database up to date.
+Documentation : https://directplus.documentation.dnb.com/html/guides/Monitor/Monitoring.html
+Integrate  update data- Monitoring Portfolio Name
+•Information to monitor?
+•Data exchange method ?
+•Etc.
+Billing rules:
+•DUNS monitored for at least one day during the contract period will be billed.
+•On the anniversary date, the DUNS under monitoring are automatically renewed for the following period.
+Preparation and Creation of the 
+Monitoring PortfolioUse of the Monitoring Portfolio & Retrieval of notifications via API call
+"Batch update processIntegration process,
+•Add companies  to 
+monitor
+•Remove  companies  
+from my monitoring 
+
+--- Page 4 ---
+Monitoring process
+Retrieving  updates for monitored  companies  via API: API PULL
+Customer 
+Batch
+Recursive call until all updates are retrieved
+Monitoring Portfolio= 
+Registration
+
+--- Page 5 ---
+1 – Creation  of the monitoring 
+Portfolio : D&B Registation
+
+--- Page 6 ---
+Registration created  by D&BRequest the creation of the 
+registration
+•The Registration is a portfolio of DUNS that allows the client to track all changes for one or more Datablocks
+(e.g., companyinfo_L2_v1, principalscontacts_L1_v1 ). It is created by D&B in collaboration with the client and 
+the Altares project manager, based on predefined parameters.
+•Setting up this monitoring process takes 7 business days .Creation  of the monitoring Portfolio : D&B Registation
+Define the Client Portfolio 
+= list of DUNS
+
+--- Page 7 ---
+Registration ARGS Description
+Reference : Registration name  (RegistrationID ) This name will be used in the files containing updates and in the WebService calls related to monitoring. Non -editable.     NO
+LOD : Duns to be monitored In our case, we will monitor a list of Duns (LOD). Non -editable. .                                                                                                                            
+seedData  : SEED requested  ?It is an initialization file.
+Only during the creation of the Registration and as part of the data recovery process, I attach a list of Duns to enrich. The result will be a 
+.txt file containing the JSON enrichments of the Duns with the data.
+False
+DataBlocks  : Monitored  datablocksNames of DataBlocks separated by a comma (e.g., "companyinfo_L1_v1, principalscontacts_L1_v1").
+Non-editable.
+notificationType  : what should the update file contain?UPDATE  – It provides only the data before and after the update.
+To be used for displaying an alert list to identify the modified data of a DUNS if needed.
+Non-editable.
+Mode API_PULL
+Destination Type : how notification are recieved N/A 
+File Management : automatique deletion  of files in FTP N/A
+Notification Frequency :  What  frequency  files are delivered N/A
+JSON Path Inclusion ( trigger de reception ) Define the data for which we want to have monitoring (optional; by default, it will be for all the data in the DataBlocks ).
+JSON Path Exclusion Define the data for which we do not want monitoring (optional; by default, it will be for all the data in the DataBlocks ).
+Mail Address  : Adresse de contact du sur le Registration N/A
+
+--- Page 8 ---
+2 – Description API_Pull
+
+--- Page 9 ---
+Endpoint https://plus.dnb.com/v1/monitoring/registrations/{reference}/notifications
+Inputs Reference
+A string used to identify the record. The reference must be unique for each subscriber.
+maxNotifications
+Requests the extraction of a certain number of notifications, if applicable, up to the specified value. If maxNotifications
+is not specified, one notification will be returned (if available). If fewer notifications are available than the value of 
+maxNotifications , all available notifications will be returned. The Pull API may return a large number of small 
+notifications (incomplete product) or a smaller number of larger notifications. When an error or timeout occurs during 
+the extraction of notifications, it is recommended to reduce the maximum number of notifications to be extracted.
+outputs JSON response with primarily a notification array, where each element includes:
+The notification type: UPDATE
+Organisation object, which contains:
+duns
+Element object consisting of the data that has changed in the D&B databases.D&B Direct+ Documentation | API Details (dnb.com)Pull Notifications - Documentation
+
+--- Page 10 ---
+10Objective: Obtain the list of notifications in Pull mode
+Complete documentation : https://directplus.documentation.dnb.com/openAPI.html?apiID=monRegistrationPullAPI
+https://plus.dnb.com/v1/monitoring/registrations/{reference}/notifications
+Nom du registration
+Input parameters Description/best practice 
+MaxNotifications  (best practice) to 1 up to 100 (Update)
+The format depends  on the type of notification ( update) 1 up to 100 notifications on Update
+Message 404 : Not Found No notifications availble , calls were  already  made
+WARNING ! Availabilty  of the notifications 4 days
+Erreur or timeout Decrease  the number  of notificationsMonitoring Process –API Pull Mode Call (Notifications)
+Response
+
+--- Page 11 ---
+11Exemple on UPDATE
+{
+    "transactionDetail ": {
+        "transactionID ": "rrt -0a68fa2f1d89ad965 -b-eu-10610 -21233151 -90",
+        "transactionTimestamp ": "2024 -02-25T16:21:00.869Z",
+        "inLanguage ": "en -US"
+    },
+    "inquiryDetail ": {
+        "reference ": "Test_Sambath_API_Pull_Update "
+    },
+    "notifications": [
+        {
+            "type": " UPDATE ",
+            "organization ": {
+                "duns ": "081466849"
+            },
+            "elements ": [
+                {
+                    "element ": 
+"organization.corporateLinkage.globalUltimateFamilyTreeMembersCount",
+                    "previous ": 1326,
+                    "current ": 1327,
+                    "timestamp": "2024 -02-22T11:07:46Z"
+                }
+            ],
+            "deliveryTimeStamp ": "2024 -02-25T16:21:07.593Z 
+        }
+    ]
+}Data updated
+Date and time of the update
+Date/Heure d’appel en mode API_PULLType of notificationsRef registration
+Duns updated
+
+--- Page 12 ---
+monitoring process –Adding DUNS to monitoring.
+Add duns  to monitoring
+Documentation : 
+https://directplus.documentation.dnb.com/openAPI.html?apiID=monAddSubjectsToRegistration
+https://directplus.documentation.dnb/openAPI.html?apiID=monAddSingleSubjectToRegistration       
+Add 1 duns  monitoring – call API (HTTP verb  = POST ) : 
+https://plus.dnb.com/v1/monitoring/registrations/ Registration_reference /subjects/ {subjectID}  
+subject=duns
+o Either
+o Have a list of duns
+o Plan a batch with a recursive call for individual addition 
+and activate monitoring.
+
+--- Page 13 ---
+monitoring process –deleting DUNS to monitoring.
+Objectif  : Supprimer un duns  unitairement dans le monitoring
+Documentation complète : 
+https://directplus.documentation.dnb.com/openAPI.html?apiID=monRemoveSingleSubjectFromRegistration  
+                
+oPlan a batch with a recursive call.
+Retrease  1 duns  from  monitoring - callAPI  (HTTP verb  = DELETE ) : 
+https://plus.dnb.com/v1/monitoring/registrations/ Registration_reference /subjects/ {subjectID} / 
+subject=duns
+
+--- Page 14 ---
+2- Return notifications 
+after the date passed as 
+a parameter.1-Calll API PULL REPLAY with  timestamp as input
+3- Reminder: PULL API call in a loop with the timestamp from the 
+previous response until all notifications have been retrieved.Pull Notifications : Replay
+Allows for replaying previously extracted notifications for a subscription.
+The notifications that have been extracted are available to be replayed via the replay API for 14 days.
+Customer app
+
+
+--- Page 15 ---
+15Objective : To retrieve the list of notifications in Pull mode (replay). UPDATE
+Complete Documentation: 
+https://directplus.documentation.dnb.com/openAPI.html?apiID=monRegistrationPullAPIReplay
+The Pull API must be executed within 4 days; after that, the call can be made in Replay mode for 
+14 days.
+https://plus.dnb.com/v1/monitoring/registrations/{reference}/notifications/ replayRegistration Name
+Information Description
+Registration created  API_PULL ( deliveryTrigger ) API_PULL
+Availbilty  of notifications4 days
+Mode UPDATE 1175 notifications
+MaxNotifications 10Monitoring process – call Replay
+
+--- Page 16 ---
+16Monitoring process –  call Pull API - Limitations
+Information Description
+Registration created  API_PULL ( deliveryTrigger ) API_PULL
+Availbility  of the notifications4 days
+Mode UPDATE 1175 notifications
+Mode Replay Pull – input parameter  
+replayStartTimestampduring  14 days
+Max of duns  in the process300 000 
+
+
+--- Page 17 ---
+17Exemple of UPDATE with replayStartTimestamp  (1/2)
+{
+    "transactionDetail ": {
+        "transactionID ": "rrt -055e002969f3beb7d -c-eu-9986 -22696003 -28",
+        "transactionTimestamp ": "2024 -03-01T14:37:14.517Z",
+        "inLanguage ": "en -US"
+    },
+    "inquiryDetail ": {
+        "reference ": "Test_SAS_API_Pull_Update "
+    },
+    "notifications": [
+        {
+            "type": " UPDATE ",
+            "organization ": {
+                "duns ": "268909075 "
+            },
+            "elements ": [
+                {
+                    "element ": 
+"organization.corporateLinkage.globalUltimateFamilyTreeMembersCount",
+                    "previous ": 1524,
+                    "current ": 1526,
+                    "timestamp": " 2024 -02-27T15:46:18Z "
+                }
+            ],
+            "deliveryTimeStamp ": "2024 -03-01T10:20:38.815Z"
+        }
+    ]
+}Data updated
+Date/time of update
+Date/Heure of call API_PULLType of update Registration reference
+Duns updated
+
+--- Page 18 ---
+Exemple of UPDATE with replayStartTimestamp  (2/2)
+D&B Direct+ Documentation | API Details (dnb.com)
+Block of notifications
+The element that was 
+updated
+Le timestamp o n which 
+we need to loop until all 
+notifications are 
+exhausted
+
+--- Page 19 ---
+Pull Notifications - Documentation  : Replay
+D&B Direct+ Documentation | API Details (dnb.com)
+Endpoint https://plus.dnb.com/v1/monitoring/registrations/{reference}/notifications/ replay
+Inputs Reference
+A string used to identify the record. The reference must be unique for each subscriber.
+maxNotifications
+Requests the extraction of a certain number of notifications, if applicable, up to the specified value. If 
+maxNotifications is not specified, one notification will be returned (if available). If fewer notifications are available 
+than the value of maxNotifications , all available notifications will be returned. The Pull API may return a large 
+number of small notifications (incomplete product) or a smaller number of large notifications. When an error or 
+timeout occurs during the extraction of notifications, it is recommended to reduce the maximum number of 
+notifications to be extracted.
+replayStartTimestamp
+A valid ISO -8601 string in the format " yyyy -MM -dd'T'hh:mm:ss'Z '". The replay API will return the first notification 
+after the timestamp indicated by this parameter, up to the maxNotifications number if available.
+outputs JSON response primarily consisting of a notification array, where each element includes:
+•The notification type: FULL_PRODUCT, UPDATE
+•Organisation object, which includes:
+•duns
+•Element object consisting of the data that has changed in the D&B databases
+•deliveryTimeStamp
+
+--- Page 20 ---
+3 – Monitoring process, other  
+APIs
+
+--- Page 21 ---
+21Fonctionnality API
+Add/supress  duns  
+Add duns to monitoringhttps://plus.dnb.com/v1/ monitoring/registrations /{RegistrationID} /subjects/ {subjectID} /
+HTTP verb  : POST
+Delete duns from monitoringhttps://plus.dnb.com/v1/ monitoring/registrations /{RegistrationID} /subjects/ {sujectID} /
+HTTP verb  : DELETE
+API call Pull mode https://plus.dnb.com/v1/monitoring/registrations/export/{RegistrationID}/notifications  
+other APIS
+Activate  notifications (once seed  is processed )https://plus.dnb.com/v1/ monitoring/registrations /{RegistrationID} /subjects
+HTTP verb  :  DELETE 
+https://plus.dnb.com/v1/ monitoring/registrations/export /{RegistrationID} /subjects  Export liste of duns under montoring
+Liste of registration on an account (850xxxx)https://plus.dnb.com/v1/monitoring/registrations
+HTTP verb  : GET
+Details of registrations https://plus.dnb.com/v1/monitoring/registrations /{RegistrationID}
+HTTP verb  : GET
+Check duns in registrationhttps://plus.dnb.com/v1/monitoring/registrations/ RegistrationID} /duns/{ subjectID }
+HTTP verb  : GETDocumentation de toutes les APIs de monitoring : https://directplus.documentation.dnb.com/html/pages/MonitoringAPIs.htmlMonitoring process: Liste of APIs Monitoring
+subject=duns
+
+--- Page 22 ---
+4 – Notifications management
+
+--- Page 23 ---
+Notification management 1/2
+Type of 
+NotificationContent UPDATE
+DELETE Duns was deleted X
+EXIT UN DUNS is not under  monitoring X
+REVIEWED Duns is under  monitoring – notification will be sent later X
+TRANSFER Duns has been transfered  to another  duns X
+UNDELETE Duns was undeleted X
+UNDER_REVIEW Duns is under  process. No notifications will be sent undet  this status . X
+UPDATE Update has been sent X
+SEEDWhen a DUNS is added to monitoring: UPDATE + FULL_PRODUCT
+A SEED notification is sent when a DUNS has been updated: FULL_PRODUCT.X
+
+--- Page 24 ---
+Activities  :
+Activities Notification Types for LOD Registrations Explanations
+Duns was deletedUPDATE or SEEDAll pending notifications for the registered DUNS number before it is deleted will be sent. 
+However, once the DUNS number has the "deleted" status, no further update notifications will 
+be sent. UPDATE or SEED depends on the " notificationType " parameter of the Portfolio.DELETE
+Duns is not deleted  anymoreUNDELETEFor the universe registration, a SEED record is included only if the Registration has Seed File = 
+True.
+SEEDFor the LOD registration, a SEED record is included if Registration for Seed File = True OR the 
+notificationType is FULL_PRODUCT
+Data changes for a DUNS may include: New content, 
+deleted content, and updated content.UPDATE UPDATE depends  on input Registration notificationType .
+DUNS -A is transferred to DUNS -B; DUNS -A was in the portfolio. 
+DUNS -B is no longer.(DUNS -A)
+TRANSFERModifiez l'enregistrement pour supprimer DUNS -A et ajouter 
+DUNS -B.
+DUNS -A is transferred to DUNS -B; DUNS -B was in the portfolio; 
+DUNS -A is no longer.¨no notifications
+DUNS is under  review UNDER_REVIEW
+The DUNS revision is finalized. REVIEWED SEED is included only if the registration includes the SEED request.
+DUNS is removed  from monitoring REMOVED
+DUNS is under  review  and transfered TRANSFERNotification management 1/2
+

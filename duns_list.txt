@@ -1,0 +1,18 @@
+# DUNS Numbers for Monitoring
+# One DUNS per line - comments and empty lines are ignored
+# Format: 9-digit DUNS number
+
+001017545
+001211952
+001316439
+001344381
+001389360
+
+# You can add more DUNS numbers here:
+# 123456789
+# 987654321
+
+# Example companies for testing:
+# 006273905
+# 804735132
+# 069032677

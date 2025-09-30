@@ -1,0 +1,2 @@
+# Additional requirements for SFTP storage functionality
+paramiko>=2.11.0
