@@ -1,0 +1,766 @@
+{
+  "info": {
+    "name": "TraceOne Monitoring API",
+    "description": "Complete collection for testing TraceOne D&B monitoring service endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://plus.dnb.com/v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "registration_reference",
+      "value": "TraceOne_Test_Registration",
+      "type": "string"
+    },
+    {
+      "key": "test_duns",
+      "value": "123456789",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Authentication endpoints for obtaining access tokens",
+      "item": [
+        {
+          "name": "Get Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has access_token', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('access_token');",
+                  "    pm.expect(jsonData).to.have.property('token_type');",
+                  "    pm.expect(jsonData).to.have.property('expires_in');",
+                  "});",
+                  "",
+                  "// Store access token for subsequent requests",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                  "    console.log('Access token stored:', jsonData.access_token.substring(0, 20) + '...');",
+                  "}",
+                  "",
+                  "// Test token expiration",
+                  "pm.test('Token expires in reasonable time', function () {",
+                  "    pm.expect(jsonData.expires_in).to.be.above(3000); // At least 50 minutes",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/token",
+              "host": ["{{base_url}}"],
+              "path": ["token"]
+            },
+            "description": "Obtain OAuth2 access token using client credentials flow"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Registration Management",
+      "description": "Endpoints for creating and managing monitoring registrations",
+      "item": [
+        {
+          "name": "Create Registration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Registration created successfully', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('reference');",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.eql('PENDING');",
+                  "});",
+                  "",
+                  "// Store registration reference",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.reference) {",
+                  "    pm.collectionVariables.set('registration_reference', jsonData.reference);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"{{registration_reference}}\",\n  \"description\": \"Test registration for Postman testing\",\n  \"lod\": \"duns_list\",\n  \"dataBlocks\": [\n    \"companyinfo_L2_v1\",\n    \"principalscontacts_L1_v1\"\n  ],\n  \"seedData\": false,\n  \"notificationType\": \"UPDATE\",\n  \"deliveryTrigger\": \"API_PULL\",\n  \"jsonPathInclusion\": [\n    \"organization.primaryName\",\n    \"organization.operatingStatus\",\n    \"organization.registeredAddress\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/monitoring/registrations",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "registrations"]
+            },
+            "description": "Create a new monitoring registration"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Registration Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Registration details returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('reference');",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData).to.have.property('dataBlocks');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitoring/registrations/{{registration_reference}}",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "registrations", "{{registration_reference}}"]
+            },
+            "description": "Get details of a specific registration"
+          },
+          "response": []
+        },
+        {
+          "name": "List All Registrations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Registrations list returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('At least one registration exists', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitoring/registrations",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "registrations"]
+            },
+            "description": "List all monitoring registrations"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "DUNS Management",
+      "description": "Endpoints for managing DUNS numbers in registrations",
+      "item": [
+        {
+          "name": "Add Single DUNS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('DUNS added successfully', function () {",
+                  "    // Check if response indicates success",
+                  "    pm.expect(pm.response.code).to.be.below(300);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/monitoring/registrations/{{registration_reference}}/subjects/{{test_duns}}?subject=duns",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "registrations", "{{registration_reference}}", "subjects", "{{test_duns}}"],
+              "query": [
+                {
+                  "key": "subject",
+                  "value": "duns"
+                }
+              ]
+            },
+            "description": "Add a single DUNS to monitoring registration"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Multiple DUNS (Batch)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Batch operation successful', function () {",
+                  "    // Verify the batch operation completed",
+                  "    pm.expect(pm.response.code).to.be.below(300);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/csv"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "987654321\n555666777\n444555666"
+            },
+            "url": {
+              "raw": "{{base_url}}/monitoring/registrations/{{registration_reference}}/subjects",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "registrations", "{{registration_reference}}", "subjects"]
+            },
+            "description": "Add multiple DUNS numbers in batch using CSV format"
+          },
+          "response": []
+        },
+        {
+          "name": "Export DUNS List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('DUNS list exported', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('subjects');",
+                  "    pm.expect(jsonData.subjects).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitoring/registrations/export/{{registration_reference}}/subjects",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "registrations", "export", "{{registration_reference}}", "subjects"]
+            },
+            "description": "Export list of DUNS numbers being monitored"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove DUNS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 204', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "pm.test('DUNS removed successfully', function () {",
+                  "    pm.expect(pm.response.code).to.be.below(300);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitoring/registrations/{{registration_reference}}/subjects/{{test_duns}}",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "registrations", "{{registration_reference}}", "subjects", "{{test_duns}}"]
+            },
+            "description": "Remove a DUNS from monitoring registration"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Monitoring Control",
+      "description": "Endpoints for activating, suppressing, and controlling monitoring",
+      "item": [
+        {
+          "name": "Activate Monitoring",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 204', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "pm.test('Monitoring activated', function () {",
+                  "    pm.expect(pm.response.code).to.be.below(300);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitoring/registrations/{{registration_reference}}/suppress",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "registrations", "{{registration_reference}}", "suppress"]
+            },
+            "description": "Activate monitoring by removing suppression"
+          },
+          "response": []
+        },
+        {
+          "name": "Suppress Monitoring",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('Monitoring suppressed', function () {",
+                  "    pm.expect(pm.response.code).to.be.below(300);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Temporary suppression for testing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/monitoring/registrations/{{registration_reference}}/suppress",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "registrations", "{{registration_reference}}", "suppress"]
+            },
+            "description": "Suppress monitoring temporarily"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pull API",
+      "description": "Endpoints for pulling notifications",
+      "item": [
+        {
+          "name": "Pull Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Pull response structure is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('transactionDetail');",
+                  "    pm.expect(jsonData).to.have.property('inquiryDetail');",
+                  "    pm.expect(jsonData.inquiryDetail).to.have.property('reference');",
+                  "});",
+                  "",
+                  "pm.test('Notifications array exists', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('notifications');",
+                  "    pm.expect(jsonData.notifications).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Store notification count for reporting",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('notification_count', jsonData.notifications.length);",
+                  "console.log('Notifications pulled:', jsonData.notifications.length);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitoring/pull/{{registration_reference}}?maxNotifications=10",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "pull", "{{registration_reference}}"],
+              "query": [
+                {
+                  "key": "maxNotifications",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Pull available notifications for a registration"
+          },
+          "response": []
+        },
+        {
+          "name": "Pull with Replay",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Replay response is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('transactionDetail');",
+                  "    pm.expect(jsonData).to.have.property('notifications');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitoring/pull/{{registration_reference}}?replayFrom={{replay_timestamp}}&maxNotifications=25",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "pull", "{{registration_reference}}"],
+              "query": [
+                {
+                  "key": "replayFrom",
+                  "value": "{{replay_timestamp}}"
+                },
+                {
+                  "key": "maxNotifications",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "Pull notifications with replay from specific timestamp"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pull Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Statistics returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('registrationReference');",
+                  "    pm.expect(jsonData).to.have.property('totalNotifications');",
+                  "    pm.expect(jsonData).to.have.property('lastPullTimestamp');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitoring/statistics/{{registration_reference}}",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "statistics", "{{registration_reference}}"]
+            },
+            "description": "Get statistics for notification pulling"
+          },
+          "response": []
+        },
+        {
+          "name": "Acknowledge Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 204', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "pm.test('Notifications acknowledged', function () {",
+                  "    pm.expect(pm.response.code).to.be.below(300);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"acknowledgedNotifications\": [\n    {\n      \"notificationId\": \"notification_id_1\",\n      \"timestamp\": \"2024-08-28T15:00:00Z\"\n    },\n    {\n      \"notificationId\": \"notification_id_2\",\n      \"timestamp\": \"2024-08-28T15:01:00Z\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/monitoring/acknowledge/{{registration_reference}}",
+              "host": ["{{base_url}}"],
+              "path": ["monitoring", "acknowledge", "{{registration_reference}}"]
+            },
+            "description": "Acknowledge processed notifications"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Checks",
+      "description": "Endpoints for system health and status checks",
+      "item": [
+        {
+          "name": "API Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Health check response', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.eql('healthy');",
+                  "});",
+                  "",
+                  "pm.test('Response time is acceptable', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Check API health status"
+          },
+          "response": []
+        },
+        {
+          "name": "Service Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Service status returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('service');",
+                  "    pm.expect(jsonData).to.have.property('version');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["status"]
+            },
+            "description": "Get detailed service status information"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script",
+          "console.log('Running request:', pm.info.requestName);",
+          "",
+          "// Set replay timestamp to 24 hours ago",
+          "var yesterday = new Date();",
+          "yesterday.setDate(yesterday.getDate() - 1);",
+          "pm.collectionVariables.set('replay_timestamp', yesterday.toISOString());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script",
+          "pm.test('Response time is reasonable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+          "});",
+          "",
+          "pm.test('Content-Type header is present', function () {",
+          "    pm.expect(pm.response.headers.get('Content-Type')).to.exist;",
+          "});"
+        ]
+      }
+    }
+  ]
+}
