@@ -1,0 +1,77 @@
+---
+# Development Environment Configuration with SFTP Storage
+environment: development
+debug: true
+
+# D&B API Configuration
+dnb_api:
+  base_url: "https://plus.dnb.com"
+  client_id: "${DNB_CLIENT_ID}"
+  client_secret: "${DNB_CLIENT_SECRET}"
+  rate_limit: 5.0  # calls per second
+  timeout: 30      # seconds
+  retry_attempts: 3
+  backoff_factor: 2.0
+
+# Database Configuration
+database:
+  url: "${DATABASE_URL:postgresql://localhost:5432/traceone_monitoring_dev}"
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+
+# Monitoring Configuration
+monitoring:
+  polling_interval: 300        # 5 minutes
+  max_notifications: 100
+  notification_batch_size: 25
+  replay_window_days: 14
+
+# Logging Configuration
+logging:
+  level: "DEBUG"
+  format: "json"
+  file: "${LOG_FILE:./logs/traceone-monitoring-dev.log}"
+  max_size: "100MB"
+  backup_count: 5
+
+# Security Configuration
+security:
+  encryption_key: "${ENCRYPTION_KEY}"
+  audit_logging: true
+  rate_limiting: true
+  token_refresh_buffer: 300
+
+# Metrics Configuration
+metrics:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+
+# SFTP Storage Configuration
+sftp_storage:
+  enabled: true
+  hostname: "${SFTP_HOSTNAME:sftp.example.com}"
+  port: 22
+  username: "${SFTP_USERNAME:notifications}"
+  # SSH Key Authentication (recommended for security)
+  private_key_path: "${SFTP_PRIVATE_KEY_PATH:~/.ssh/id_rsa}"
+  private_key_passphrase: "${SFTP_KEY_PASSPHRASE}"  # Optional if key has passphrase
+  # Alternative: Password authentication
+  # password: "${SFTP_PASSWORD}"
+  
+  # Remote paths
+  remote_base_path: "/notifications"
+  
+  # File format options
+  file_format: "json"  # json, csv, or xml
+  compress_files: false
+  
+  # Connection settings
+  timeout: 30
+  max_retries: 3
+  
+  # File organization
+  organize_by_date: true
+  organize_by_registration: true

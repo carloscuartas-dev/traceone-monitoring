@@ -1,0 +1,67 @@
+---
+# Demo Configuration for Monitoring Workflow
+environment: development
+debug: true
+
+# D&B API Configuration (using dummy values for demo)
+dnb_api:
+  base_url: "https://plus.dnb.com"
+  client_id: "demo_client_id"  # Replace with real values
+  client_secret: "demo_client_secret"  # Replace with real values
+  rate_limit: 5.0
+  timeout: 30
+  retry_attempts: 3
+  backoff_factor: 2.0
+
+# Database Configuration (using dummy values for demo)
+database:
+  url: "postgresql://demo:demo@localhost:5432/demo_db"
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+
+# Monitoring Configuration
+monitoring:
+  polling_interval: 300
+  max_notifications: 100
+  notification_batch_size: 25
+  replay_window_days: 14
+
+# Logging Configuration
+logging:
+  level: "DEBUG"
+  format: "json"
+  file: "./logs/demo.log"
+  max_size: "100MB"
+  backup_count: 5
+
+# Security Configuration  
+security:
+  encryption_key: "demo_encryption_key_32_bytes_long"
+  audit_logging: true
+  rate_limiting: true
+  token_refresh_buffer: 300
+
+# Metrics Configuration
+metrics:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+
+# SFTP Storage Configuration - ENABLED for demo
+sftp_storage:
+  enabled: true  # Enable SFTP storage for demo
+  hostname: "mft.dnb.com"
+  port: 22
+  username: "trace"
+  password: ""  # Using private key instead
+  private_key_path: "~/.ssh/id_rsa"
+  private_key_passphrase: ""  # No passphrase
+  remote_base_path: "/gets"  # Based on our testing
+  file_format: "json"
+  compress_files: false
+  timeout: 30
+  max_retries: 3
+  organize_by_date: true
+  organize_by_registration: true

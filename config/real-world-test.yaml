@@ -1,0 +1,113 @@
+---
+# Real-World Test Configuration
+# This configuration integrates local file processing with the complete monitoring system
+environment: development
+debug: true
+
+# D&B API Configuration (for potential future integration)
+dnb_api:
+  base_url: "https://plus.dnb.com"
+  client_id: "${DNB_CLIENT_ID}"
+  client_secret: "${DNB_CLIENT_SECRET}"
+  rate_limit: 5.0
+  timeout: 30
+  retry_attempts: 3
+  backoff_factor: 2.0
+
+# Database Configuration (optional for this test)
+database:
+  url: "${DATABASE_URL:postgresql://localhost:5432/traceone_monitoring_test}"
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+
+# Main Monitoring Configuration
+monitoring:
+  polling_interval: 60         # 1 minute for faster testing
+  max_notifications: 1000      # Higher limit for bulk processing
+  notification_batch_size: 100 # Larger batches
+  replay_window_days: 14
+
+# LOCAL FILE MONITORING - NEW INTEGRATION
+local_file_monitoring:
+  enabled: true
+  input_directory: "~/Library/Mobile Documents/com~apple~CloudDocs/Projects/Traceone/dev/sftp"
+  polling_interval: 60  # Check every minute for testing
+  registration_reference: "local-sftp-files"
+  
+  # File processing options
+  process_json_files: true
+  process_txt_files: true
+  process_zip_files: true
+  process_header_files: true
+  
+  # Archive processed files (set to false for testing, true for production)
+  auto_archive_processed: false  # Keep files for repeated testing
+  archive_directory: "~/Library/Mobile Documents/com~apple~CloudDocs/Projects/Traceone/dev/sftp/processed"
+  
+  # File patterns (can be customized)
+  file_patterns:
+    seedfile: "*SEEDFILE*.txt"
+    header: "*HEADER*.json"
+    exception: "*exception*.txt"
+    duns_export: "*DunsExport*.txt"
+    zip_archive: "*.zip"
+  
+  # Processing limits for testing
+  max_files_per_batch: 50
+
+# Local File Storage (for output testing)
+local_storage:
+  enabled: true
+  base_path: "./test_output/notifications"
+  file_format: "json"
+  organize_by_date: true
+  organize_by_registration: true
+  compress_files: false
+
+# SFTP Storage (optional - enable if you want to test SFTP output)
+sftp_storage:
+  enabled: false  # Set to true if you want to test SFTP output
+  hostname: "${SFTP_HOSTNAME:localhost}"
+  port: 22
+  username: "${SFTP_USERNAME:testuser}"
+  private_key_path: "${SFTP_PRIVATE_KEY_PATH:~/.ssh/id_rsa}"
+  remote_base_path: "/test_notifications"
+  file_format: "json"
+  compress_files: false
+  timeout: 30
+  max_retries: 3
+  organize_by_date: true
+  organize_by_registration: true
+
+# Logging Configuration
+logging:
+  level: "INFO"  # Use INFO to see processing details without debug spam
+  format: "json"
+  file: "./test_output/logs/real-world-test.log"
+  max_size: "50MB"
+  backup_count: 3
+
+# Security Configuration (minimal for testing)
+security:
+  encryption_key: "${ENCRYPTION_KEY:test-key-change-in-production}"
+  audit_logging: true
+  rate_limiting: false  # Disable for testing
+  token_refresh_buffer: 300
+
+# Metrics Configuration
+metrics:
+  enabled: true
+  port: 9091  # Different port to avoid conflicts
+  path: "/metrics"
+
+# Health Check Configuration
+health_checks:
+  enabled: true
+  port: 8081  # Different port for health checks
+  endpoints:
+    - "/health"
+    - "/status"
+    - "/metrics"
+    - "/local-files"  # Custom endpoint for local file status

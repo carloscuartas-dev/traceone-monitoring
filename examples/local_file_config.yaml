@@ -1,0 +1,84 @@
+# TraceOne Monitoring Configuration with Local File Integration
+# This example shows how to configure the monitoring system to process local SFTP files
+
+environment: "development"
+
+# Standard DNB API configuration
+dnb_api:
+  environment: "sandbox"
+  client_id: "${DNB_CLIENT_ID}"
+  client_secret: "${DNB_CLIENT_SECRET}"
+  base_url: "https://plus.dnb.com/v1"
+  timeout: 30
+  max_retries: 3
+
+# Main monitoring configuration
+monitoring:
+  polling_interval: 300  # 5 minutes
+  max_notifications_per_request: 100
+  enable_replay: true
+  replay_lookback_hours: 24
+
+# Local file input monitoring configuration (NEW)
+local_file_monitoring:
+  enabled: true
+  input_directory: "~/Library/Mobile Documents/com~apple~CloudDocs/Projects/Traceone/dev/sftp"
+  polling_interval: 300  # Check for new files every 5 minutes
+  registration_reference: "local-sftp-files"
+  
+  # File processing options
+  process_json_files: true
+  process_txt_files: true
+  process_zip_files: true
+  process_header_files: true
+  
+  # Archive processed files to avoid reprocessing
+  auto_archive_processed: true
+  archive_directory: "~/Library/Mobile Documents/com~apple~CloudDocs/Projects/Traceone/dev/sftp/processed"
+  
+  # File patterns to match (optional, defaults are usually fine)
+  file_patterns:
+    seedfile: "*SEEDFILE*.txt"
+    header: "*HEADER*.json"
+    exception: "*exception*.txt"
+    duns_export: "*DunsExport*.txt"
+    zip_archive: "*.zip"
+  
+  # Processing limits
+  max_files_per_batch: 100
+
+# SFTP storage (for storing processed notifications)
+sftp_storage:
+  enabled: true
+  hostname: "your-sftp-server.com"
+  port: 22
+  username: "${SFTP_USERNAME}"
+  private_key_path: "~/.ssh/id_rsa"
+  remote_base_path: "/notifications"
+  file_format: "json"
+  compress_files: false
+  organize_by_date: true
+  organize_by_registration: true
+
+# Local file storage (backup storage)
+local_storage:
+  enabled: true
+  base_path: "~/traceone-monitoring/data/notifications"
+  file_format: "json"
+  organize_by_date: true
+  organize_by_registration: true
+
+# Health check configuration
+health_checks:
+  enabled: true
+  port: 8080
+  endpoints:
+    - "/health"
+    - "/status"
+    - "/metrics"
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "json"
+  output: "console"

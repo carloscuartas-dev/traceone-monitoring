@@ -1,0 +1,235 @@
+---
+# TraceOne Portfolio Configuration Examples
+# This file shows different approaches to organizing companies into monitoring portfolios
+
+# Supplier Portfolio - Standard monitoring for key suppliers
+supplier_portfolio:
+  name: "Key Suppliers Q4 2024"
+  description: "Critical suppliers for Q4 manufacturing operations"
+  monitoring_type: "standard"
+  companies:
+    - name: "ABC Manufacturing Corp"
+      duns: "123456789"
+      category: "Tier 1 Supplier"
+      contact: "procurement@abcmfg.com"
+    - name: "XYZ Components Ltd"
+      duns: "987654321"
+      category: "Tier 1 Supplier"
+      contact: "sales@xyzcomponents.com"
+    - name: "Global Supply Chain Inc"
+      duns: "555666777"
+      category: "Tier 2 Supplier"
+      contact: "partnerships@globalsupply.com"
+    - name: "Precision Parts LLC"
+      duns: "444555666"
+      category: "Specialized Supplier"
+      contact: "orders@precisionparts.com"
+    - name: "Innovation Materials Co"
+      duns: "777888999"
+      category: "Raw Materials"
+      contact: "sales@innovationmaterials.com"
+
+# Financial Risk Portfolio - Enhanced monitoring for high-risk entities
+financial_risk_portfolio:
+  name: "High Risk Entities"
+  description: "High-value entities requiring financial risk monitoring"
+  monitoring_type: "financial"
+  companies:
+    - name: "High Value Customer A"
+      duns: "111222333"
+      category: "Major Customer"
+      risk_level: "High"
+      credit_limit: 5000000
+    - name: "Large Supplier B"
+      duns: "444555666"
+      category: "Strategic Supplier"
+      risk_level: "Medium"
+      exposure_amount: 2000000
+    - name: "Strategic Partner C"
+      duns: "777888999"
+      category: "Joint Venture Partner"
+      risk_level: "High"
+      partnership_value: 10000000
+
+# Customer Portfolio - Monitor key customers
+customer_portfolio:
+  name: "Major Customers 2024"
+  description: "Key customers requiring proactive monitoring"
+  monitoring_type: "standard"
+  companies:
+    - name: "Fortune 500 Client 1"
+      duns: "100200300"
+      category: "Enterprise Customer"
+      annual_revenue: 15000000
+    - name: "Growing Tech Startup"
+      duns: "200300400"
+      category: "Growth Customer"
+      potential_value: 5000000
+    - name: "Government Agency"
+      duns: "300400500"
+      category: "Public Sector"
+      contract_duration: "3 years"
+
+# Geographic Portfolio - Companies by region
+geographic_portfolio:
+  name: "European Operations"
+  description: "Companies in European markets"
+  monitoring_type: "standard"
+  region: "Europe"
+  companies:
+    - name: "European Supplier 1"
+      duns: "400500600"
+      country: "Germany"
+      category: "Manufacturing"
+    - name: "European Customer 1"
+      duns: "500600700"
+      country: "France"
+      category: "Distribution"
+    - name: "European Partner 1"
+      duns: "600700800"
+      country: "United Kingdom"
+      category: "Technology"
+
+# Multi-tier Portfolio Structure
+multi_tier_portfolios:
+  tier_1_critical:
+    name: "Tier 1 Critical Entities"
+    description: "Most critical business relationships requiring immediate attention"
+    monitoring_type: "financial"
+    alert_priority: "critical"
+    companies:
+      - name: "Critical Supplier Alpha"
+        duns: "700800900"
+        business_impact: "High"
+        replacement_difficulty: "Very Hard"
+      - name: "Major Customer Beta"
+        duns: "800900100"
+        revenue_percentage: 25
+        strategic_importance: "Critical"
+  
+  tier_2_important:
+    name: "Tier 2 Important Entities"
+    description: "Important relationships requiring regular monitoring"
+    monitoring_type: "standard"
+    alert_priority: "high"
+    companies:
+      - name: "Important Supplier Gamma"
+        duns: "900100200"
+        business_impact: "Medium"
+        replacement_difficulty: "Moderate"
+      - name: "Regional Customer Delta"
+        duns: "101020300"
+        revenue_percentage: 10
+        growth_potential: "High"
+  
+  tier_3_standard:
+    name: "Tier 3 Standard Entities"
+    description: "Standard business relationships"
+    monitoring_type: "standard"
+    alert_priority: "medium"
+    companies:
+      - name: "Standard Supplier Epsilon"
+        duns: "102030400"
+        business_impact: "Low"
+        replacement_difficulty: "Easy"
+
+# Industry-specific Portfolios
+industry_portfolios:
+  automotive:
+    name: "Automotive Supply Chain"
+    description: "Automotive industry suppliers and customers"
+    monitoring_type: "standard"
+    industry: "Automotive"
+    companies:
+      - name: "Auto Parts Manufacturer"
+        duns: "103040500"
+        sic_code: "3714"
+        certification: "ISO/TS 16949"
+      - name: "Vehicle Assembly Plant"
+        duns: "104050600"
+        sic_code: "3711"
+        production_capacity: "500000 units/year"
+  
+  technology:
+    name: "Technology Partners"
+    description: "Technology sector partners and vendors"
+    monitoring_type: "financial"
+    industry: "Technology"
+    companies:
+      - name: "Software Vendor Alpha"
+        duns: "105060700"
+        sic_code: "7372"
+        service_type: "SaaS"
+      - name: "Hardware Supplier Beta"
+        duns: "106070800"
+        sic_code: "3571"
+        product_category: "Networking Equipment"
+
+# Compliance and Regulatory Portfolios
+compliance_portfolios:
+  public_sector:
+    name: "Government Contracts"
+    description: "Government agencies and public sector entities"
+    monitoring_type: "standard"
+    compliance_requirements:
+      - "Security Clearance"
+      - "FFATA Reporting"
+      - "SAM Registration"
+    companies:
+      - name: "Federal Agency A"
+        duns: "107080900"
+        cage_code: "12345"
+        clearance_level: "Secret"
+      - name: "State Government B"
+        duns: "108091000"
+        contract_type: "GSA Schedule"
+  
+  financial_services:
+    name: "Financial Services Entities"
+    description: "Banks, credit unions, and financial institutions"
+    monitoring_type: "financial"
+    regulatory_requirements:
+      - "FDIC Insured"
+      - "Basel III Compliance"
+      - "Dodd-Frank Compliance"
+    companies:
+      - name: "Regional Bank A"
+        duns: "109010200"
+        charter_type: "State"
+        assets: "5 billion USD"
+      - name: "Credit Union B"
+        duns: "110020300"
+        membership_type: "Community"
+        members: "50000"
+
+# Configuration for Portfolio Management
+portfolio_settings:
+  default_monitoring_type: "standard"
+  default_polling_interval: 300  # 5 minutes
+  default_notification_batch_size: 25
+  
+  # Alert thresholds
+  alert_thresholds:
+    critical_changes:
+      - "operatingStatus"
+      - "financialStrength"
+      - "dnbRating"
+    immediate_notification:
+      - "DELETE"
+      - "TRANSFER"
+      - "UNDER_REVIEW"
+  
+  # Notification preferences
+  notifications:
+    email_alerts: true
+    webhook_urls:
+      - "https://your-webhook-endpoint.com/notifications"
+    slack_integration:
+      enabled: false
+      webhook_url: ""
+  
+  # Data retention
+  data_retention:
+    notification_history: "1 year"
+    portfolio_statistics: "2 years"
+    error_logs: "6 months"

@@ -1,0 +1,125 @@
+# TraceOne Monitoring Configuration with HubSpot Integration
+# Copy this file and customize for your environment
+
+environment: development
+debug: true
+
+# D&B API Configuration
+dnb_api:
+  base_url: "https://plus.dnb.com"
+  client_id: "${DNB_CLIENT_ID}"
+  client_secret: "${DNB_CLIENT_SECRET}"
+  rate_limit: 5.0
+  timeout: 30
+  retry_attempts: 3
+  backoff_factor: 2.0
+
+# Database Configuration (Required)
+database:
+  url: "${DATABASE_URL:sqlite:///./test.db}"
+  pool_size: 10
+  max_overflow: 20
+  pool_timeout: 30
+  pool_recycle: 3600
+
+# Monitoring Service
+monitoring:
+  polling_interval: 300  # 5 minutes
+  max_notifications: 100
+  notification_batch_size: 50
+  replay_window_days: 14
+
+# Logging Configuration
+logging:
+  level: INFO
+  format: json
+  file: logs/traceone-monitoring.log
+  max_size: 100MB
+  backup_count: 5
+
+# Security Settings
+security:
+  encryption_key: "${ENCRYPTION_KEY:}"
+  audit_logging: true
+  rate_limiting: true
+  token_refresh_buffer: 300
+
+# Metrics
+metrics:
+  enabled: true
+  port: 9090
+  path: /metrics
+
+# File Storage Options
+sftp_storage:
+  enabled: false
+
+local_storage:
+  enabled: true
+  base_path: "./demo_notifications"
+  file_format: json
+  organize_by_date: true
+  organize_by_registration: true
+
+# Email Notifications
+email_notifications:
+  enabled: false  # Set to true and configure SMTP settings if needed
+
+# HubSpot Integration
+hubspot_notifications:
+  enabled: ${HUBSPOT_ENABLED:false}
+  
+  # API Configuration
+  api_token: "${HUBSPOT_API_TOKEN:}"
+  base_url: "https://api.hubapi.com"
+  timeout: 30
+  rate_limit_delay: 0.1  # Delay between API calls
+  batch_size: 10
+  
+  # Company Mapping Configuration
+  duns_property_name: "${HUBSPOT_DUNS_PROPERTY:duns_number}"
+  company_domain_property: "${HUBSPOT_DOMAIN_PROPERTY:domain}"
+  create_missing_companies: true
+  
+  # Default properties for new companies
+  default_company_properties:
+    source: "TraceOne D&B Monitoring"
+    lifecyclestage: "lead"
+    hubspot_owner_id: null  # Set if you have a default owner
+  
+  # Task and Note Configuration
+  task_owner_email: "${HUBSPOT_TASK_OWNER_EMAIL:}"
+  pipeline_id: "${HUBSPOT_PIPELINE_ID:}"
+  deal_stage_id: "${HUBSPOT_DEAL_STAGE_ID:}"
+  
+  # Notification Action Mappings
+  # Define what actions to take for each D&B notification type
+  notification_actions:
+    DELETE:
+      - create_task
+      - create_note
+      - update_property
+    TRANSFER:
+      - create_task
+      - create_note
+      - update_property
+    UNDER_REVIEW:
+      - create_task
+      - create_note
+    UPDATE:
+      - create_note
+      - update_property
+    SEED:
+      - update_company
+      - create_note
+    UNDELETE:
+      - create_note
+      - update_property
+    REVIEWED:
+      - create_note
+    EXIT:
+      - create_task
+      - create_note
+    REMOVED:
+      - create_task
+      - create_note

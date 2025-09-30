@@ -1,0 +1,80 @@
+# Multi-Storage Demo Configuration
+# This configuration demonstrates using both SFTP and local file storage simultaneously
+environment: "development"
+debug: true
+
+# D&B API Configuration
+dnb_api:
+  base_url: "https://plus.dnb.com"
+  client_id: "${DNB_CLIENT_ID:demo_client_id}"
+  client_secret: "${DNB_CLIENT_SECRET:demo_client_secret}"
+  rate_limit: 5.0
+  timeout: 30
+  retry_attempts: 3
+  backoff_factor: 2.0
+
+# Database Configuration
+database:
+  url: "${DATABASE_URL:sqlite:///./monitoring_demo.db}"
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+
+# Monitoring Configuration
+monitoring:
+  polling_interval: 30  # More frequent for demo
+  max_notifications: 10
+  notification_batch_size: 5
+  replay_window_days: 7
+
+# Logging Configuration  
+logging:
+  level: "INFO"
+  format: "text"  # More readable for demo
+  file: null
+  max_size: "10MB"
+  backup_count: 3
+
+# Security Configuration
+security:
+  encryption_key: null
+  audit_logging: true
+  rate_limiting: true
+  token_refresh_buffer: 300
+
+# Metrics Configuration
+metrics:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+
+# SFTP Storage Configuration (enabled)
+sftp_storage:
+  enabled: true
+  hostname: "${SFTP_HOSTNAME:sftp.example.com}"
+  port: 22
+  username: "${SFTP_USERNAME:demo_user}"
+  password: "${SFTP_PASSWORD:}"
+  private_key_path: "${SFTP_PRIVATE_KEY_PATH:~/.ssh/id_rsa}"
+  private_key_passphrase: "${SFTP_PRIVATE_KEY_PASSPHRASE:}"
+  remote_base_path: "/notifications"
+  file_format: "json"
+  compress_files: false
+  timeout: 30
+  max_retries: 3
+  organize_by_date: true
+  organize_by_registration: true
+
+# Local File Storage Configuration (enabled)
+local_storage:
+  enabled: true
+  base_path: "${LOCAL_STORAGE_PATH:./demo_notifications}"
+  file_format: "json"
+  compress_files: false
+  organize_by_date: true
+  organize_by_registration: true
+  file_permissions: 420  # 0o644 in decimal
+  directory_permissions: 493  # 0o755 in decimal
+  max_files_per_directory: 100
+  enable_rotation: false

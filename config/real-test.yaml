@@ -1,0 +1,81 @@
+environment: development
+debug: true
+dnb_api:
+  base_url: ${DNB_BASE_URL:https://plus.dnb.com}
+  client_id: ${DNB_CLIENT_ID}
+  client_secret: ${DNB_CLIENT_SECRET}
+  rate_limit: 5.0
+  timeout: 30
+  retry_attempts: 3
+  backoff_factor: 2.0
+database:
+  url: ${DATABASE_URL:sqlite:///./real_test_results.db}
+  pool_size: 10
+  max_overflow: 20
+  pool_timeout: 30
+  pool_recycle: 3600
+monitoring:
+  polling_interval: 60
+  max_notifications: 50
+  notification_batch_size: 25
+  replay_window_days: 7
+  notification_types:
+  - UPDATE
+  - INSERT
+  - DELETE
+local_storage:
+  enabled: true
+  base_path: ./test_results
+  file_format: json
+  compress_files: false
+  organize_by_date: true
+  organize_by_registration: true
+  file_permissions: 644
+  directory_permissions: 755
+  max_files_per_directory: 1000
+  enable_rotation: false
+sftp_storage:
+  enabled: false
+logging:
+  level: INFO
+  format: json
+  file: ./logs/real-test.log
+  max_size: 50MB
+  backup_count: 3
+  console_output: true
+email_notifications:
+  enabled: true
+  smtp_server: ${EMAIL_SMTP_SERVER:smtp.gmail.com}
+  smtp_port: 587
+  username: ${EMAIL_USERNAME}
+  password: ${EMAIL_PASSWORD}
+  use_tls: true
+  use_ssl: false
+  timeout: 30
+  from_email: ${EMAIL_FROM_EMAIL:${EMAIL_USERNAME}}
+  from_name: TraceOne DUNS Monitoring
+  to_emails: ${EMAIL_TO_EMAILS}
+  cc_emails: []
+  bcc_emails: []
+  send_individual_notifications: false
+  send_summary_notifications: true
+  summary_frequency: immediate
+  critical_notifications_only: false
+  max_notifications_per_email: 50
+  subject_prefix: '[TraceOne Alert]'
+  template_dir: null
+registration:
+  default_notification_types:
+  - UPDATE
+  - INSERT
+  - DELETE
+  default_data_blocks:
+  - companyinfo
+  - hierarchyconnections
+  - eventfilings
+  json_path_inclusion:
+  - organization.duns
+  - organization.primaryName
+  - organization.numberOfEmployees
+  - organization.annualSalesRevenue
+  - organization.isMarketable
