@@ -104,10 +104,16 @@ class DNBAuthenticator:
             credentials = f"{self.config.client_id}:{self.config.client_secret}"
             encoded_credentials = base64.b64encode(credentials.encode()).decode()
             
+            # Debug logging
+            logger.debug("Authentication debug info",
+                        client_id=self.config.client_id[:10] + "..." + self.config.client_id[-4:],
+                        credentials_length=len(credentials),
+                        encoded_length=len(encoded_credentials))
+            
             # Prepare request
-            url = f"{self.config.base_url}/v2/token"
+            url = f"{self.config.base_url}/v3/token"
             headers = {
-                "Content-Type": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
                 "Authorization": f"Basic {encoded_credentials}",
             }
             
@@ -115,10 +121,16 @@ class DNBAuthenticator:
                 "grant_type": "client_credentials"
             }
             
+            # Debug request details
+            logger.debug("Making token request",
+                        url=url,
+                        headers={k: "***" if k.lower() == "authorization" else v for k, v in headers.items()},
+                        payload=payload)
+            
             # Make request
             response = self.session.post(
                 url,
-                json=payload,
+                data=payload,
                 headers=headers,
                 timeout=self.config.timeout
             )
@@ -135,7 +147,7 @@ class DNBAuthenticator:
             # Parse response
             token_data = response.json()
             self.token = token_data.get("access_token")
-            expires_in = token_data.get("expiresIn", 86400)  # Default 24 hours
+            expires_in = token_data.get("expires_in", 86400)  # Default 24 hours
             
             if not self.token:
                 raise AuthenticationError("No access token in response")

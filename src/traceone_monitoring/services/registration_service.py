@@ -372,12 +372,17 @@ class RegistrationManager:
         """Add DUNS in batch mode"""
         endpoint = f"/v1/monitoring/registrations/{registration_reference}/subjects"
         
-        # Prepare CSV data
-        csv_data = "\\n".join(duns_list)
+        # Prepare CSV data - each DUNS on a new line
+        csv_data = "\n".join(duns_list)
         
         headers = {
             "Content-Type": "text/csv"
         }
+        
+        logger.debug("Sending DUNS batch add request",
+                    endpoint=endpoint,
+                    duns_count=len(duns_list),
+                    csv_preview=csv_data[:100] + "..." if len(csv_data) > 100 else csv_data)
         
         response = self.client.patch(endpoint, data=csv_data, headers=headers)
         
@@ -391,6 +396,7 @@ class RegistrationManager:
         endpoint = f"/v1/monitoring/registrations/{registration_reference}/subjects/{duns}"
         params = {"subject": "duns"}
         
+        
         response = self.client.post(endpoint, params=params)
         
         logger.debug("Single DUNS added successfully",
@@ -401,14 +407,19 @@ class RegistrationManager:
         """Remove DUNS in batch mode"""
         endpoint = f"/v1/monitoring/registrations/{registration_reference}/subjects"
         
-        # Prepare CSV data
-        csv_data = "\\n".join(duns_list)
+        # Prepare CSV data - each DUNS on a new line
+        csv_data = "\n".join(duns_list)
         
         headers = {
             "Content-Type": "text/csv"
         }
         
-        response = self.client.patch(endpoint, data=csv_data, headers=headers)
+        logger.debug("Sending DUNS batch remove request",
+                    endpoint=endpoint,
+                    duns_count=len(duns_list),
+                    csv_preview=csv_data[:100] + "..." if len(csv_data) > 100 else csv_data)
+        
+        response = self.client.delete(endpoint, data=csv_data, headers=headers)
         
         logger.debug("DUNS batch removed successfully",
                     registration=registration_reference,

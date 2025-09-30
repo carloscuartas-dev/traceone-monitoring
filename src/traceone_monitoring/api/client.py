@@ -331,8 +331,17 @@ class ApiMetrics:
             "auth_errors": self.auth_errors,
             "uptime_seconds": (datetime.utcnow() - self.start_time).total_seconds(),
         }
-</function_calls>
 
-<function_calls>
-<invoke name="mark_todo_as_done">
-<parameter name="todo_ids">["0d2582d3-9a96-4784-bcf5-686d4e69207e", "d3f44bc2-2dc2-4baf-83e8-76891c630418", "d81cd6df-7344-4caf-a9fc-73586ddd7c07"]
+
+def create_api_client(config: DNBApiConfig, auth: DNBAuthenticator) -> DNBApiClient:
+    """
+    Create and configure DNB API client
+    
+    Args:
+        config: DNB API configuration
+        auth: Authenticator instance
+        
+    Returns:
+        Configured API client
+    """
+    return DNBApiClient(auth, config)
