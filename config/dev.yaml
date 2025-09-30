@@ -48,3 +48,20 @@ metrics:
   enabled: true
   port: 9090
   path: "/metrics"
+
+# SFTP Storage Configuration
+sftp_storage:
+  enabled: false  # Set to true to enable SFTP storage
+  hostname: "${SFTP_HOSTNAME:mft.dnb.com}"
+  port: ${SFTP_PORT:22}
+  username: "${SFTP_USERNAME:trace}"
+  password: "${SFTP_PASSWORD:}"  # Optional, use private key instead
+  private_key_path: "${SFTP_PRIVATE_KEY_PATH:~/.ssh/id_rsa}"
+  private_key_passphrase: "${SFTP_PRIVATE_KEY_PASSPHRASE:}"  # Optional
+  remote_base_path: "${SFTP_REMOTE_PATH:/gets}"  # Adjust based on your server setup
+  file_format: "${SFTP_FILE_FORMAT:json}"  # json, csv, or xml
+  compress_files: ${SFTP_COMPRESS:false}
+  timeout: ${SFTP_TIMEOUT:30}
+  max_retries: ${SFTP_MAX_RETRIES:3}
+  organize_by_date: ${SFTP_ORGANIZE_BY_DATE:true}
+  organize_by_registration: ${SFTP_ORGANIZE_BY_REGISTRATION:true}

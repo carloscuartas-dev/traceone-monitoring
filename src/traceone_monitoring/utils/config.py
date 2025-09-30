@@ -8,6 +8,9 @@ from typing import Optional, Dict, Any, List
 from pathlib import Path
 from pydantic import BaseModel, Field, validator
 from dotenv import load_dotenv
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class DNBApiConfig(BaseModel):
@@ -79,6 +82,162 @@ class MetricsConfig(BaseModel):
     enabled: bool = Field(default=True, description="Enable metrics collection")
     port: int = Field(default=9090, description="Metrics server port")
     path: str = Field(default="/metrics", description="Metrics endpoint path")
+
+
+class SFTPStorageConfig(BaseModel):
+    """SFTP storage configuration"""
+    enabled: bool = Field(default=False, description="Enable SFTP storage")
+    hostname: str = Field(default="", description="SFTP server hostname")
+    port: int = Field(default=22, description="SFTP server port")
+    username: str = Field(default="", description="SFTP username")
+    password: Optional[str] = Field(default=None, description="SFTP password")
+    private_key_path: Optional[str] = Field(default=None, description="Path to private key file")
+    private_key_passphrase: Optional[str] = Field(default=None, description="Private key passphrase")
+    
+    # Remote paths
+    remote_base_path: str = Field(default="/notifications", description="Base path on SFTP server")
+    
+    # File format options
+    file_format: str = Field(default="json", description="File format (json, csv, xml)")
+    compress_files: bool = Field(default=False, description="Compress files before upload")
+    
+    # Connection settings
+    timeout: int = Field(default=30, description="Connection timeout in seconds")
+    max_retries: int = Field(default=3, description="Maximum retry attempts")
+    
+    # File organization
+    organize_by_date: bool = Field(default=True, description="Organize files by date")
+    organize_by_registration: bool = Field(default=True, description="Organize files by registration")
+
+
+class LocalFileStorageConfig(BaseModel):
+    """Local file storage configuration"""
+    enabled: bool = Field(default=False, description="Enable local file storage")
+    base_path: str = Field(default="./notifications", description="Base directory path for storage")
+    file_format: str = Field(default="json", description="File format (json, csv, xml)")
+    compress_files: bool = Field(default=False, description="Compress files after creation")
+    
+    # File organization
+    organize_by_date: bool = Field(default=True, description="Organize files by date")
+    organize_by_registration: bool = Field(default=True, description="Organize files by registration")
+    
+    # File permissions
+    file_permissions: int = Field(default=0o644, description="File permissions (octal)")
+    directory_permissions: int = Field(default=0o755, description="Directory permissions (octal)")
+    
+    # Retention settings
+    max_files_per_directory: int = Field(default=1000, description="Maximum files per directory")
+    enable_rotation: bool = Field(default=False, description="Enable file rotation")
+
+
+class EmailNotificationConfig(BaseModel):
+    """Email notification configuration"""
+    enabled: bool = Field(default=False, description="Enable email notifications")
+    
+    # SMTP Configuration
+    smtp_server: str = Field(default="smtp.gmail.com", description="SMTP server hostname")
+    smtp_port: int = Field(default=587, description="SMTP server port")
+    username: str = Field(default="", description="SMTP username")
+    password: str = Field(default="", description="SMTP password")
+    use_tls: bool = Field(default=True, description="Use TLS encryption")
+    use_ssl: bool = Field(default=False, description="Use SSL encryption")
+    timeout: int = Field(default=30, description="SMTP timeout in seconds")
+    
+    # Email Headers
+    from_email: str = Field(default="", description="From email address")
+    from_name: str = Field(default="TraceOne Monitoring", description="From name")
+    to_emails: List[str] = Field(default_factory=list, description="Recipient email addresses")
+    cc_emails: List[str] = Field(default_factory=list, description="CC email addresses")
+    bcc_emails: List[str] = Field(default_factory=list, description="BCC email addresses")
+    
+    # Notification Settings
+    send_individual_notifications: bool = Field(default=False, description="Send individual emails per notification")
+    send_summary_notifications: bool = Field(default=True, description="Send summary emails")
+    summary_frequency: str = Field(default="immediate", description="Summary frequency (immediate, hourly, daily)")
+    critical_notifications_only: bool = Field(default=False, description="Send only critical notifications")
+    max_notifications_per_email: int = Field(default=100, description="Maximum notifications per email")
+    
+    # Email Content
+    subject_prefix: str = Field(default="[TraceOne Alert]", description="Email subject prefix")
+    template_dir: Optional[str] = Field(default=None, description="Custom email template directory")
+    
+    @validator('smtp_port')
+    def validate_smtp_port(cls, v):
+        if v < 1 or v > 65535:
+            raise ValueError('SMTP port must be between 1 and 65535')
+        return v
+    
+    @validator('summary_frequency')
+    def validate_summary_frequency(cls, v):
+        valid_frequencies = ['immediate', 'hourly', 'daily']
+        if v.lower() not in valid_frequencies:
+            raise ValueError(f'Summary frequency must be one of: {valid_frequencies}')
+        return v.lower()
+    
+    @validator('to_emails', pre=True)
+    def validate_to_emails(cls, v):
+        if isinstance(v, str):
+            return [email.strip() for email in v.split(',') if email.strip()]
+        return v or []
+
+
+class HubSpotNotificationConfig(BaseModel):
+    """HubSpot notification configuration"""
+    enabled: bool = Field(default=False, description="Enable HubSpot notifications")
+    
+    # API Configuration
+    api_token: str = Field(default="", description="HubSpot API access token")
+    base_url: str = Field(default="https://api.hubapi.com", description="HubSpot API base URL")
+    timeout: int = Field(default=30, description="API request timeout in seconds")
+    rate_limit_delay: float = Field(default=0.1, description="Delay between API calls in seconds")
+    batch_size: int = Field(default=10, description="Batch size for processing notifications")
+    
+    # Company Mapping
+    duns_property_name: str = Field(default="duns_number", description="HubSpot property name for DUNS numbers")
+    company_domain_property: str = Field(default="domain", description="HubSpot property name for company domain")
+    create_missing_companies: bool = Field(default=True, description="Create companies if they don't exist in HubSpot")
+    
+    # Default Properties for New Companies
+    default_company_properties: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "source": "TraceOne D&B Monitoring",
+            "lifecyclestage": "lead"
+        },
+        description="Default properties to set when creating new companies"
+    )
+    
+    # Task and Note Configuration
+    task_owner_email: Optional[str] = Field(default=None, description="Email of default task owner")
+    pipeline_id: Optional[str] = Field(default=None, description="HubSpot pipeline ID for deals")
+    deal_stage_id: Optional[str] = Field(default=None, description="HubSpot deal stage ID")
+    
+    # Notification Action Mappings
+    notification_actions: Dict[str, List[str]] = Field(
+        default_factory=lambda: {
+            "DELETE": ["create_task", "create_note", "update_property"],
+            "TRANSFER": ["create_task", "create_note", "update_property"],
+            "UNDER_REVIEW": ["create_task", "create_note"],
+            "UPDATE": ["create_note", "update_property"],
+            "SEED": ["update_company", "create_note"],
+            "UNDELETE": ["create_note", "update_property"],
+            "REVIEWED": ["create_note"],
+            "EXIT": ["create_task", "create_note"],
+            "REMOVED": ["create_task", "create_note"]
+        },
+        description="Actions to take for each notification type"
+    )
+    
+    @validator('rate_limit_delay')
+    def validate_rate_limit_delay(cls, v):
+        if v < 0 or v > 10:
+            raise ValueError('Rate limit delay must be between 0 and 10 seconds')
+        return v
+    
+    @validator('batch_size')
+    def validate_batch_size(cls, v):
+        if v < 1 or v > 100:
+            raise ValueError('Batch size must be between 1 and 100')
+        return v
     
     
 class AppConfig(BaseModel):
@@ -91,6 +250,10 @@ class AppConfig(BaseModel):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     metrics: MetricsConfig = Field(default_factory=MetricsConfig)
+    sftp_storage: SFTPStorageConfig = Field(default_factory=SFTPStorageConfig)
+    local_storage: LocalFileStorageConfig = Field(default_factory=LocalFileStorageConfig)
+    email_notifications: EmailNotificationConfig = Field(default_factory=EmailNotificationConfig)
+    hubspot_notifications: HubSpotNotificationConfig = Field(default_factory=HubSpotNotificationConfig)
 
     @validator('environment')
     def validate_environment(cls, v):
@@ -122,19 +285,42 @@ class ConfigManager:
         if self._config is not None:
             return self._config
         
-        # Load environment variables
-        load_dotenv()
-        
         if self.config_path:
+            # Load environment variables from corresponding .env file
+            self._load_env_file_for_config(self.config_path)
             # Load from YAML file
             config_data = self._load_yaml_config(self.config_path)
         else:
+            # Load environment variables from default locations
+            load_dotenv()
             # Load from environment variables
             config_data = self._load_env_config()
         
         # Validate and create configuration object
         self._config = AppConfig(**config_data)
         return self._config
+    
+    def _load_env_file_for_config(self, config_path: str):
+        """Load corresponding .env file for a YAML config file"""
+        config_file = Path(config_path)
+        config_dir = config_file.parent
+        config_name = config_file.stem  # e.g., 'dev' from 'dev.yaml'
+        
+        # Try multiple .env file patterns
+        env_patterns = [
+            config_dir / f"{config_name}.env",  # e.g., config/dev.env
+            config_dir / ".env",               # e.g., config/.env
+            Path(".env"),                      # project root .env
+        ]
+        
+        for env_file in env_patterns:
+            if env_file.exists():
+                logger.debug(f"Loading environment file: {env_file}")
+                load_dotenv(env_file)
+                return
+        
+        # If no specific .env file found, try default load_dotenv
+        load_dotenv()
     
     def _load_yaml_config(self, config_path: str) -> Dict[str, Any]:
         """Load configuration from YAML file"""
@@ -193,6 +379,48 @@ class ConfigManager:
                 "enabled": os.getenv("METRICS_ENABLED", "true").lower() == "true",
                 "port": int(os.getenv("METRICS_PORT", "9090")),
                 "path": os.getenv("METRICS_PATH", "/metrics"),
+            },
+            "sftp_storage": {
+                "enabled": os.getenv("SFTP_ENABLED", "false").lower() == "true",
+                "hostname": os.getenv("SFTP_HOSTNAME", ""),
+                "port": int(os.getenv("SFTP_PORT", "22")),
+                "username": os.getenv("SFTP_USERNAME", ""),
+                "password": os.getenv("SFTP_PASSWORD"),
+                "private_key_path": os.getenv("SFTP_PRIVATE_KEY_PATH"),
+                "private_key_passphrase": os.getenv("SFTP_PRIVATE_KEY_PASSPHRASE"),
+                "remote_base_path": os.getenv("SFTP_REMOTE_PATH", "/notifications"),
+                "file_format": os.getenv("SFTP_FILE_FORMAT", "json"),
+                "compress_files": os.getenv("SFTP_COMPRESS", "false").lower() == "true",
+                "timeout": int(os.getenv("SFTP_TIMEOUT", "30")),
+                "max_retries": int(os.getenv("SFTP_MAX_RETRIES", "3")),
+                "organize_by_date": os.getenv("SFTP_ORGANIZE_BY_DATE", "true").lower() == "true",
+                "organize_by_registration": os.getenv("SFTP_ORGANIZE_BY_REGISTRATION", "true").lower() == "true",
+            },
+            "local_storage": {
+                "enabled": os.getenv("LOCAL_STORAGE_ENABLED", "false").lower() == "true",
+                "base_path": os.getenv("LOCAL_STORAGE_PATH", "./notifications"),
+                "file_format": os.getenv("LOCAL_STORAGE_FORMAT", "json"),
+                "compress_files": os.getenv("LOCAL_STORAGE_COMPRESS", "false").lower() == "true",
+                "organize_by_date": os.getenv("LOCAL_STORAGE_ORGANIZE_BY_DATE", "true").lower() == "true",
+                "organize_by_registration": os.getenv("LOCAL_STORAGE_ORGANIZE_BY_REGISTRATION", "true").lower() == "true",
+                "file_permissions": int(os.getenv("LOCAL_STORAGE_FILE_PERMS", "644"), 8),
+                "directory_permissions": int(os.getenv("LOCAL_STORAGE_DIR_PERMS", "755"), 8),
+                "max_files_per_directory": int(os.getenv("LOCAL_STORAGE_MAX_FILES", "1000")),
+                "enable_rotation": os.getenv("LOCAL_STORAGE_ROTATION", "false").lower() == "true",
+            },
+            "hubspot_notifications": {
+                "enabled": os.getenv("HUBSPOT_ENABLED", "false").lower() == "true",
+                "api_token": os.getenv("HUBSPOT_API_TOKEN", ""),
+                "base_url": os.getenv("HUBSPOT_BASE_URL", "https://api.hubapi.com"),
+                "timeout": int(os.getenv("HUBSPOT_TIMEOUT", "30")),
+                "rate_limit_delay": float(os.getenv("HUBSPOT_RATE_LIMIT_DELAY", "0.1")),
+                "batch_size": int(os.getenv("HUBSPOT_BATCH_SIZE", "10")),
+                "duns_property_name": os.getenv("HUBSPOT_DUNS_PROPERTY", "duns_number"),
+                "company_domain_property": os.getenv("HUBSPOT_DOMAIN_PROPERTY", "domain"),
+                "create_missing_companies": os.getenv("HUBSPOT_CREATE_MISSING", "true").lower() == "true",
+                "task_owner_email": os.getenv("HUBSPOT_TASK_OWNER_EMAIL"),
+                "pipeline_id": os.getenv("HUBSPOT_PIPELINE_ID"),
+                "deal_stage_id": os.getenv("HUBSPOT_DEAL_STAGE_ID"),
             },
         }
     
